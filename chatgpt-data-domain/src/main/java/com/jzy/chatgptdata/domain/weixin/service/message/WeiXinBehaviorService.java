@@ -42,13 +42,15 @@ public class WeiXinBehaviorService implements IWeiXinBehaviorService {
         // Text 文本类型
         if (MsgTypeVO.TEXT.getCode().equals(userBehaviorMessageEntity.getMsgType())) {
 
-            // 缓存验证码
+            // 缓存验证码，检查该openId用户是否短时间内申请过验证码
             String isExistCode = codeCache.getIfPresent(userBehaviorMessageEntity.getOpenId());
 
             // 判断验证码 - 不考虑验证码重复问题
             if (StringUtils.isBlank(isExistCode)) {
                 // 创建验证码
                 String code = RandomStringUtils.randomNumeric(4);
+                //
+                // 双向缓存，根据不同的需求快速查找对应的数据
                 codeCache.put(code, userBehaviorMessageEntity.getOpenId());
                 codeCache.put(userBehaviorMessageEntity.getOpenId(), code);
                 isExistCode = code;
