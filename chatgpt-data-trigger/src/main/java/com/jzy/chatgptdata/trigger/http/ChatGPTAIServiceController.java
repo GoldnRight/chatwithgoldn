@@ -1,9 +1,9 @@
 package com.jzy.chatgptdata.trigger.http;
 
 import com.jzy.chatgptdata.domain.auth.service.IAuthService;
-import com.jzy.chatgptdata.domain.model.aggregates.ChatProcessAggregate;
-import com.jzy.chatgptdata.domain.model.entity.MessageEntity;
-import com.jzy.chatgptdata.domain.service.IChatService;
+import com.jzy.chatgptdata.domain.openai.model.aggregates.ChatProcessAggregate;
+import com.jzy.chatgptdata.domain.openai.model.entity.MessageEntity;
+import com.jzy.chatgptdata.domain.openai.service.IChatService;
 import com.jzy.chatgptdata.trigger.http.dto.ChatGPTRequestDTO;
 import com.jzy.chatgptdata.types.exception.ChatGPTException;
 import com.alibaba.fastjson.JSON;
