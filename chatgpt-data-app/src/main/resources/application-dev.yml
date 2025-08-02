@@ -1,0 +1,93 @@
+server:
+  port: 8091
+
+# 应用配置
+app:
+  config:
+    # 版本，方便通过接口版本升级
+    api-version: v1
+    # 跨域，开发阶段可以设置为 * 不限制
+    cross-origin: '*'
+    # 访问频次限制
+    limit-count: 10
+    # 白名单，不做频次拦截【微信的openai】oxfA9w8-23yvwTmo2ombz0E4zJv4
+    white-list: ojbZUv18lbmriaTjcCWBYkOrSbHA
+
+# 支付配置；如果你申请了支付渠道，则可以配置 enable = true，否则就配置 false 走流程测试
+wxpay:
+  config:
+    # 状态；true = 开启、false 关闭
+    enabled: false
+    # 申请支付主体的 appid
+    appid:
+    # 商户号
+    mchid:
+    # 回调地址
+    notify-url: http://你的地址.natapp1.cc/api/v1/mall/pay_notify
+    # 商户API私钥路径
+    private-key-path: cert/apiclient_key.pem
+    # 商户证书序列号：openssl x509 -in apiclient_cert.pem -noout -serial
+    merchant-serial-number:
+    # 商户APIV3密钥
+    api-v3-key:
+
+# 线程池配置
+thread:
+  pool:
+    executor:
+      config:
+        core-pool-size: 20
+        max-pool-size: 50
+        keep-alive-time: 5000
+        block-queue-size: 5000
+        policy: CallerRunsPolicy
+
+# ChatGLM SDK Config
+chatglm:
+  sdk:
+    zhipu:
+      config:
+        # 状态；true = 开启、false 关闭
+        enabled: true
+        # 官网地址
+        api-host: https://open.bigmodel.cn/
+        # 官网申请 https://open.bigmodel.cn/usercenter/apikeys - 自己可申请
+        api-secret-key: bb70cc6355ef46cdb890e7b5359cf9c2.qD9j4XV15Dwa1kD8
+
+# 微信公众号配置信息
+# originalid：原始ID
+# appid：个人AppID
+# token：开通接口服务自定义设置
+wx:
+  config:
+    originalid: gh_485263098cc1
+    appid: wx0cca3987b4bc4258
+    token: goldn
+
+## 数据库配置；SpringBoot 默认连接池为 HikariDataSource
+spring:
+  datasource:
+    username: root
+    password: Jzy200305085851
+    url: jdbc:mysql://120.26.196.227:3306/openai?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+    driver-class-name: com.mysql.jdbc.Driver
+#  hikari:
+#    pool-name: Retail_HikariCP
+#    minimum-idle: 15 #最小空闲连接数量
+#    idle-timeout: 180000 #空闲连接存活最大时间，默认600000（10分钟）
+#    maximum-pool-size: 25 #连接池最大连接数，默认是10
+#    auto-commit: true  #此属性控制从池返回的连接的默认自动提交行为,默认值：true
+#    max-lifetime: 1800000 #此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认1800000即30分钟
+#    connection-timeout: 30000 #数据库连接超时时间,默认30秒，即30000
+#    connection-test-query: SELECT 1
+#  type: com.zaxxer.hikari.HikariDataSource
+
+#mybatis:
+#  mapper-locations: classpath:/mybatis/mapper/*.xml
+#  config-location:  classpath:/mybatis/config/mybatis-config.xml
+
+# 日志
+logging:
+  level:
+    root: info
+  config: classpath:logback-spring.xml
