@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateOrderAggregate {
 
-    /** 用户ID */
-    private String userId;
-    /** 用户ID */
-    private ProductEntity productEntity;
-
-    private OrderEntity orderEntity;
+    /** 用户ID；微信用户唯一标识 */
+    private String openid;
+    /** 商品 */
+    private ProductEntity product;
+    /** 订单 */
+    private OrderEntity order;
 
 }

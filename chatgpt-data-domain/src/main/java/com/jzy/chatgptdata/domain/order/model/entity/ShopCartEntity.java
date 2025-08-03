@@ -16,10 +16,22 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ShopCartEntity {
 
-    /** 用户ID */
-    private String userId;
+    /**
+     * 用户微信唯一ID
+     */
+    private String openid;
 
-    /** 商品ID */
-    private String productId;
+    /**
+     * 商品ID
+     */
+    private Integer productId;
+
+    @Override
+    public String toString() {
+        return "ShopCartEntity{" +
+                "openid='" + openid + '\'' +
+                ", productId=" + productId +
+                '}';
+    }
 
 }

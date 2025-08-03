@@ -1,13 +1,13 @@
 package com.jzy.chatgptdata.domain.order.service;
 
 import com.jzy.chatgptdata.domain.order.model.aggregate.CreateOrderAggregate;
-import com.jzy.chatgptdata.domain.order.model.entity.OrderEntity;
-import com.jzy.chatgptdata.domain.order.model.entity.PayOrderEntity;
-import com.jzy.chatgptdata.domain.order.model.entity.ProductEntity;
-import com.jzy.chatgptdata.domain.order.model.entity.ShopCartEntity;
+import com.jzy.chatgptdata.domain.order.model.entity.*;
 import com.jzy.chatgptdata.domain.order.model.valobj.OrderStatusVO;
+import com.jzy.chatgptdata.domain.order.model.valobj.PayStatusVO;
 import com.jzy.chatgptdata.domain.order.repository.IOrderRepository;
 import com.alipay.api.AlipayApiException;
+import com.jzy.chatgptdata.types.common.Constants;
+import com.jzy.chatgptdata.types.exception.ChatGPTException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -24,72 +24,55 @@ import java.util.Date;
 public abstract class AbstractOrderService implements IOrderService {
 
     @Resource
-    protected IOrderRepository repository;
+    protected IOrderRepository orderRepository;
 
     @Override
-    public PayOrderEntity createOrder(ShopCartEntity shopCartEntity) throws Exception{
-        // 1. 查询当前用户是否存在掉单和未支付订单
-        OrderEntity unpaidOrderEntity = repository.queryUnPayOrder(shopCartEntity);
-        if (null != unpaidOrderEntity && OrderStatusVO.PAY_WAIT.equals(unpaidOrderEntity.getOrderStatus())) {
-            log.info("创建订单-存在，已存在未支付订单。userId:{} productId:{} orderId:{}", shopCartEntity.getUserId(), shopCartEntity.getProductId(), unpaidOrderEntity.getOrderId());
-            return PayOrderEntity.builder()
-                    .orderId(unpaidOrderEntity.getOrderId())
-                    .payUrl(unpaidOrderEntity.getPayUrl())
-                    .build();
-        } else if (null != unpaidOrderEntity && OrderStatusVO.CREATE.equals(unpaidOrderEntity.getOrderStatus())) {
-            log.info("创建订单-存在，存在未创建支付单订单，创建支付单开始 userId:{} productId:{} orderId:{}", shopCartEntity.getUserId(), shopCartEntity.getProductId(), unpaidOrderEntity.getOrderId());
-            PayOrderEntity payOrderEntity = this.doPrepayOrder(shopCartEntity.getUserId(), shopCartEntity.getProductId(), unpaidOrderEntity.getProductName(), unpaidOrderEntity.getOrderId(), unpaidOrderEntity.getTotalAmount());
-            return PayOrderEntity.builder()
-                    .orderId(payOrderEntity.getOrderId())
-                    .payUrl(payOrderEntity.getPayUrl())
-                    .build();
+    public PayOrderEntity createOrder(ShopCartEntity shopCartEntity) {
+        try {
+            // 0. 基础信息
+            String openid = shopCartEntity.getOpenid();
+            Integer productId = shopCartEntity.getProductId();
+
+            // 1. 查询有效的未支付订单，如果存在直接返回支付宝支付 Ali_Pay
+            UnpaidOrderEntity unpaidOrderEntity = orderRepository.queryUnPayOrder(shopCartEntity);
+            if (null != unpaidOrderEntity && PayStatusVO.WAIT.equals(unpaidOrderEntity.getPayStatus()) && null != unpaidOrderEntity.getPayUrl()) {
+                log.info("创建订单-存在，已生成支付宝支付，返回 openid: {} orderId: {} payUrl: {}", openid, unpaidOrderEntity.getOrderId(), unpaidOrderEntity.getPayUrl());
+                return PayOrderEntity.builder()
+                        .openid(openid)
+                        .orderId(unpaidOrderEntity.getOrderId())
+                        .payUrl(unpaidOrderEntity.getPayUrl())
+                        .payStatus(unpaidOrderEntity.getPayStatus())
+                        .build();
+            } else if (null != unpaidOrderEntity && null == unpaidOrderEntity.getPayUrl()) {
+                log.info("创建订单-存在，未生成支付宝支付，返回 openid: {} orderId: {}", openid, unpaidOrderEntity.getOrderId());
+                PayOrderEntity payOrderEntity = this.doPrepayOrder(openid, unpaidOrderEntity.getOrderId(), unpaidOrderEntity.getProductName(), unpaidOrderEntity.getTotalAmount());
+                log.info("创建订单-完成，生成支付单。openid: {} orderId: {} payUrl: {}", openid, payOrderEntity.getOrderId(), payOrderEntity.getPayUrl());
+                return payOrderEntity;
+            }
+
+            // 2. 商品查询
+            ProductEntity productEntity = orderRepository.queryProduct(productId);
+            if (!productEntity.isAvailable()) {
+                throw new ChatGPTException(Constants.ResponseCode.ORDER_PRODUCT_ERR.getCode(), Constants.ResponseCode.ORDER_PRODUCT_ERR.getInfo());
+            }
+
+            // 3. 保存订单
+            OrderEntity orderEntity = this.doSaveOrder(openid, productEntity);
+
+            // 4. 创建支付
+            PayOrderEntity payOrderEntity = this.doPrepayOrder(openid, orderEntity.getOrderId(), productEntity.getProductName(), orderEntity.getTotalAmount());
+            log.info("创建订单-完成，生成支付单。openid: {} orderId: {} payUrl: {}", openid, orderEntity.getOrderId(), payOrderEntity.getPayUrl());
+
+            return payOrderEntity;
+        } catch (Exception e) {
+            log.error("创建订单，已生成支付宝支付，返回 openid: {} productId: {}", shopCartEntity.getOpenid(), shopCartEntity.getProductId());
+            throw new ChatGPTException(Constants.ResponseCode.UN_ERROR.getCode(), Constants.ResponseCode.UN_ERROR.getInfo());
         }
-
-        // 2. 查询商品 & 聚合订单
-        ProductEntity productEntity = repository.queryProductByProductId(shopCartEntity.getProductId());
-        OrderEntity orderEntity = OrderEntity.builder()
-                .productId(productEntity.getProductId())
-                .productName(productEntity.getProductName())
-                .orderId(RandomStringUtils.randomNumeric(16))
-                .orderTime(new Date())
-                .orderStatus(OrderStatusVO.CREATE)
-                .build();
-        CreateOrderAggregate orderAggregate = CreateOrderAggregate.builder()
-                .userId(shopCartEntity.getUserId())
-                .productEntity(productEntity)
-                .orderEntity(orderEntity)
-                .build();
-
-        // 3. 保存订单 - 保存一份订单，再用订单生成ID生成支付单信息
-        this.doSaveOrder(orderAggregate);
-
-        // 4. 创建支付单
-        PayOrderEntity payOrderEntity = this.doPrepayOrder(shopCartEntity.getUserId(), productEntity.getProductId(), productEntity.getProductName(), orderEntity.getOrderId(), productEntity.getPrice());
-        log.info("创建订单-完成，生成支付单。userId: {} orderId: {} payUrl: {}", shopCartEntity.getUserId(), orderEntity.getOrderId(), payOrderEntity.getPayUrl());
-
-        return PayOrderEntity.builder()
-                .orderId(payOrderEntity.getOrderId())
-                .payUrl(payOrderEntity.getPayUrl())
-                .build();
     }
 
-    /**
-     * 保存订单
-     *
-     * @param orderAggregate 订单聚合
-     */
-    protected abstract void doSaveOrder(CreateOrderAggregate orderAggregate);
+    protected abstract OrderEntity doSaveOrder(String openid, ProductEntity productEntity);
 
-    /**
-     * 预支付订单生成
-     *
-     * @param userId      用户ID
-     * @param productId   商品ID
-     * @param productName 商品名称
-     * @param orderId     订单ID
-     * @param totalAmount 支付金额
-     * @return 预支付订单
-     */
-    protected abstract PayOrderEntity doPrepayOrder(String userId, String productId, String productName, String orderId, BigDecimal totalAmount) throws AlipayApiException;
+    protected abstract PayOrderEntity doPrepayOrder(String openid, String orderId, String productName, BigDecimal amountTotal);
+
 
 }

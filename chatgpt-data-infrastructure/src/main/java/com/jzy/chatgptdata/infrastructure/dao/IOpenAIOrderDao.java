@@ -13,7 +13,7 @@ import java.util.List;
 @Mapper
 public interface IOpenAIOrderDao {
 
-    OpenAIOrderPO queryUnpaidOrder(OpenAIOrderPO openAIOrderPOReq);
+    OpenAIOrderPO queryUnPayOrder(OpenAIOrderPO openAIOrderPOReq);
 
     void insert(OpenAIOrderPO order);
 
@@ -35,7 +35,7 @@ public interface IOpenAIOrderDao {
 
 //    void insert(OpenAIOrderPO order);
 
-    OpenAIOrderPO queryUnPayOrder(OpenAIOrderPO order);
+//    OpenAIOrderPO queryUnPayOrder(OpenAIOrderPO order);
 
 //    void updateOrderPayInfo(OpenAIOrderPO order);
 

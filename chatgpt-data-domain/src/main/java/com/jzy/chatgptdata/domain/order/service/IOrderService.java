@@ -1,7 +1,13 @@
 package com.jzy.chatgptdata.domain.order.service;
 
+import com.jzy.chatgptdata.domain.order.model.aggregate.CreateOrderAggregate;
 import com.jzy.chatgptdata.domain.order.model.entity.PayOrderEntity;
+import com.jzy.chatgptdata.domain.order.model.entity.ProductEntity;
 import com.jzy.chatgptdata.domain.order.model.entity.ShopCartEntity;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 订单服务
@@ -11,17 +17,58 @@ import com.jzy.chatgptdata.domain.order.model.entity.ShopCartEntity;
 public interface IOrderService {
 
     /**
-     * 通过购物车实体对象，创建支付单实体（用于支付）—— 所有的订单下单都从购物车开始触发
+     * 用户下单，通过购物车信息，返回下单后的支付单
      *
-     * @param shopCartEntity 购物车实体
-     * @return 支付单实体
+     * @param shopCartEntity 简单购物车
+     * @return 支付单实体对象
      */
-    PayOrderEntity createOrder(ShopCartEntity shopCartEntity) throws Exception;
+    PayOrderEntity createOrder(ShopCartEntity shopCartEntity);
 
     /**
-     * 更新订单状态
+     * 变更；订单支付成功
+     */
+    boolean changeOrderPaySuccess(String orderId, String transactionId, BigDecimal totalAmount, Date payTime);
+
+    boolean changeOrderPaySuccess(String orderId);
+
+    /**
+     * 查询订单信息
+     *
+     * @param orderId 订单ID
+     * @return 查询结果
+     */
+    CreateOrderAggregate queryOrder(String orderId);
+
+    /**
+     * 订单商品发货
+     *
      * @param orderId 订单ID
      */
-    void changeOrderPaySuccess(String orderId);
+    void deliverGoods(String orderId);
+
+    /**
+     * 查询待补货订单
+     */
+    List<String> queryReplenishmentOrder();
+
+    /**
+     * 查询有效期内，未接收到支付回调的订单
+     */
+    List<String> queryNoPayNotifyOrder();
+
+    /**
+     * 查询超时15分钟，未支付订单
+     */
+    List<String> queryTimeoutCloseOrderList();
+
+    /**
+     * 变更；订单支付关闭
+     */
+    boolean changeOrderClose(String orderId);
+
+    /**
+     * 查询商品列表
+     */
+    List<ProductEntity> queryProductList();
 
 }

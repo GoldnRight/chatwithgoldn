@@ -54,7 +54,7 @@ public class ApiTest {
         request.setReturnUrl(return_url);
 
         JSONObject bizContent = new JSONObject();
-        bizContent.put("out_trade_no", "daniel82AAAA000132333361X05");  // 我们自己生成的订单编号
+        bizContent.put("out_trade_no", "daniel82AAAA001132333361X05");  // 我们自己生成的订单编号
         bizContent.put("total_amount", "0.01"); // 订单的总金额
         bizContent.put("subject", "测试商品");   // 支付的名称
         bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");  // 固定配置

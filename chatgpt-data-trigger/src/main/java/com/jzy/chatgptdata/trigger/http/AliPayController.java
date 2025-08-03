@@ -30,26 +30,26 @@ public class AliPayController {
     private EventBus eventBus;
 
     /**
-     * http://localhost:8091/api/v1/alipay/create_pay_order?userId=1001&productId=100001
+     * http://localhost:8091/api/v1/alipay/create_pay_order?openid=1001&productId=100001
      *
-     * @param userId
+     * @param openid
      * @param productId
      * @return
      */
     @RequestMapping(value = "create_pay_order", method = RequestMethod.POST)
-    public Response<String> createParOrder(@RequestParam String userId, @RequestParam String productId) {
+    public Response<String> createParOrder(@RequestParam String openid, @RequestParam Integer productId) {
         try {
-            log.info("商品下单，根据商品ID创建支付单开始 userId:{} productId:{}", userId, productId);
-            ShopCartEntity shopCartEntity = ShopCartEntity.builder().userId(userId).productId(productId).build();
+            log.info("商品下单，根据商品ID创建支付单开始 openid:{} productId:{}", openid, productId);
+            ShopCartEntity shopCartEntity = ShopCartEntity.builder().openid(openid).productId(productId).build();
             PayOrderEntity payOrderEntity = orderService.createOrder(shopCartEntity);
-            log.info("商品下单，根据商品ID创建支付单完成 userId:{} productId:{} orderId:{}", userId, productId, payOrderEntity.getOrderId());
+            log.info("商品下单，根据商品ID创建支付单完成 openid:{} productId:{} orderId:{}", openid, productId, payOrderEntity.getOrderId());
             return Response.<String>builder()
                     .code(ResponseCode.SUCCESS.getCode())
                     .info(ResponseCode.SUCCESS.getInfo())
                     .data(payOrderEntity.getPayUrl())
                     .build();
         } catch (Exception e) {
-            log.error("商品下单，根据商品ID创建支付单失败 userId:{} productId:{}", userId, productId, e);
+            log.error("商品下单，根据商品ID创建支付单失败 openid:{} productId:{}", openid, productId, e);
             return Response.<String>builder()
                     .code(ResponseCode.UN_ERROR.getCode())
                     .info(ResponseCode.UN_ERROR.getInfo())
