@@ -1,4 +1,4 @@
-package com.jzy.chatgptdata.types.config;
+package com.jzy.chatgptdata.app.config;
 
 import com.github.houbb.sensitive.word.bs.SensitiveWordBs;
 import com.github.houbb.sensitive.word.utils.InnerWordCharUtils;

@@ -1,4 +1,4 @@
-package com.jzy.chatgptdata.types.config;
+package com.jzy.chatgptdata.app.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

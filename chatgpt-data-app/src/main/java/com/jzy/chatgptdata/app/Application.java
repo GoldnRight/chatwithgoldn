@@ -1,4 +1,4 @@
-package com.jzy.chatgptdata.types;
+package com.jzy.chatgptdata.app;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Configurable;

@@ -45,7 +45,8 @@ public abstract class AbstractOrderService implements IOrderService {
                         .build();
             } else if (null != unpaidOrderEntity && null == unpaidOrderEntity.getPayUrl()) {
                 log.info("创建订单-存在，未生成支付宝支付，返回 openid: {} orderId: {}", openid, unpaidOrderEntity.getOrderId());
-                PayOrderEntity payOrderEntity = this.doPrepayOrder(openid, unpaidOrderEntity.getOrderId(), unpaidOrderEntity.getProductName(), unpaidOrderEntity.getTotalAmount());
+//                PayOrderEntity payOrderEntity = this.doPrepayOrder(openid, unpaidOrderEntity.getOrderId(), unpaidOrderEntity.getProductName(), unpaidOrderEntity.getTotalAmount());
+                PayOrderEntity payOrderEntity = this.doPrepayOrder(openid, productId, unpaidOrderEntity.getProductName(), unpaidOrderEntity.getOrderId(), unpaidOrderEntity.getTotalAmount());
                 log.info("创建订单-完成，生成支付单。openid: {} orderId: {} payUrl: {}", openid, payOrderEntity.getOrderId(), payOrderEntity.getPayUrl());
                 return payOrderEntity;
             }
@@ -60,7 +61,8 @@ public abstract class AbstractOrderService implements IOrderService {
             OrderEntity orderEntity = this.doSaveOrder(openid, productEntity);
 
             // 4. 创建支付
-            PayOrderEntity payOrderEntity = this.doPrepayOrder(openid, orderEntity.getOrderId(), productEntity.getProductName(), orderEntity.getTotalAmount());
+//            PayOrderEntity payOrderEntity = this.doPrepayOrder(openid, orderEntity.getOrderId(), productEntity.getProductName(), orderEntity.getTotalAmount());
+            PayOrderEntity payOrderEntity  = this.doPrepayOrder(openid, productId, productEntity.getProductName(), orderEntity.getOrderId(), orderEntity.getTotalAmount());
             log.info("创建订单-完成，生成支付单。openid: {} orderId: {} payUrl: {}", openid, orderEntity.getOrderId(), payOrderEntity.getPayUrl());
 
             return payOrderEntity;
@@ -73,6 +75,8 @@ public abstract class AbstractOrderService implements IOrderService {
     protected abstract OrderEntity doSaveOrder(String openid, ProductEntity productEntity);
 
     protected abstract PayOrderEntity doPrepayOrder(String openid, String orderId, String productName, BigDecimal amountTotal);
+
+    protected abstract PayOrderEntity doPrepayOrder(String openid, Integer productId, String productName, String orderId, BigDecimal amountTotal) throws AlipayApiException;
 
 
 }

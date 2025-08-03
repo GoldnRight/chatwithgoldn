@@ -30,14 +30,12 @@ import java.util.List;
 @Service
 public class OrderService extends AbstractOrderService {
 
-    @Value("${wxpay.config.appid}")
-    private String appid;
-    @Value("${wxpay.config.mchid}")
-    private String mchid;
-    @Value("${wxpay.config.notify-url}")
+    @Value("${alipay.notify_url}")
     private String notifyUrl;
-    @Autowired(required = false)
-    private NativePayService payService;
+    @Value("${alipay.return_url}")
+    private String returnUrl;
+    @Resource
+    private AlipayClient alipayClient;
 
     @Override
     protected OrderEntity doSaveOrder(String openid, ProductEntity productEntity) {
@@ -62,36 +60,63 @@ public class OrderService extends AbstractOrderService {
 
     @Override
     protected PayOrderEntity doPrepayOrder(String openid, String orderId, String productName, BigDecimal amountTotal) {
-        PrepayRequest request = new PrepayRequest();
-        Amount amount = new Amount();
-        amount.setTotal(amountTotal.multiply(new BigDecimal(100)).intValue());
-        request.setAmount(amount);
-        request.setAppid(appid);
-        request.setMchid(mchid);
-        request.setDescription(productName);
+//        PrepayRequest request = new PrepayRequest();
+//        Amount amount = new Amount();
+//        amount.setTotal(amountTotal.multiply(new BigDecimal(100)).intValue());
+//        request.setAmount(amount);
+//        request.setAppid(appid);
+//        request.setMchid(mchid);
+//        request.setDescription(productName);
+//        request.setNotifyUrl(notifyUrl);
+//        request.setOutTradeNo(orderId);
+//
+//        // 创建微信支付单，如果你有多种支付方式，则可以根据支付类型的策略模式进行创建支付单
+//        String codeUrl = "";
+//        if (null != payService) {
+//            PrepayResponse prepay = payService.prepay(request);
+//            codeUrl = prepay.getCodeUrl();
+//        } else {
+//            codeUrl = "因你未配置支付渠道，所以暂时不能生成有效的支付URL。请配置支付渠道后，在application-dev.yml中配置支付渠道信息";
+//        }
+//
+//        PayOrderEntity payOrderEntity = PayOrderEntity.builder()
+//                .openid(openid)
+//                .orderId(orderId)
+//                .payUrl(codeUrl)
+//                .payStatus(PayStatusVO.WAIT)
+//                .build();
+//
+//        // 更新订单支付信息
+//        orderRepository.updateOrderPayInfo(payOrderEntity);
+        return new PayOrderEntity();
+    }
+
+    @Override
+    protected PayOrderEntity doPrepayOrder(String openid, Integer productId, String productName, String orderId, BigDecimal totalAmount) throws AlipayApiException {
+        AlipayTradePagePayRequest request = new AlipayTradePagePayRequest();
         request.setNotifyUrl(notifyUrl);
-        request.setOutTradeNo(orderId);
+        request.setReturnUrl(returnUrl);
 
-        // 创建微信支付单，如果你有多种支付方式，则可以根据支付类型的策略模式进行创建支付单
-        String codeUrl = "";
-        if (null != payService) {
-            PrepayResponse prepay = payService.prepay(request);
-            codeUrl = prepay.getCodeUrl();
-        } else {
-            codeUrl = "因你未配置支付渠道，所以暂时不能生成有效的支付URL。请配置支付渠道后，在application-dev.yml中配置支付渠道信息";
-        }
+        JSONObject bizContent = new JSONObject();
+        bizContent.put("out_trade_no", orderId);
+        bizContent.put("total_amount", totalAmount.toString());
+        bizContent.put("subject", productName);
+        bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");
+        request.setBizContent(bizContent.toString());
 
-        PayOrderEntity payOrderEntity = PayOrderEntity.builder()
-                .openid(openid)
-                .orderId(orderId)
-                .payUrl(codeUrl)
-                .payStatus(PayStatusVO.WAIT)
-                .build();
+        String form = alipayClient.pageExecute(request).getBody();
+
+        PayOrderEntity payOrderEntity = new PayOrderEntity();
+        payOrderEntity.setOpenid(openid);
+        payOrderEntity.setOrderId(orderId);
+        payOrderEntity.setPayUrl(form);
+        payOrderEntity.setPayStatus(PayStatusVO.WAIT);
 
         // 更新订单支付信息
         orderRepository.updateOrderPayInfo(payOrderEntity);
         return payOrderEntity;
     }
+
 
     @Override
     public boolean changeOrderPaySuccess(String orderId, String transactionId, BigDecimal totalAmount, Date payTime) {

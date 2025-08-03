@@ -1,4 +1,4 @@
-package com.jzy.chatgptdata.types.config;
+package com.jzy.chatgptdata.app.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

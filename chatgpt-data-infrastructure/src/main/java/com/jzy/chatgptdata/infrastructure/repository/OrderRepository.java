@@ -12,6 +12,7 @@ import com.jzy.chatgptdata.infrastructure.po.OpenAIOrderPO;
 import com.jzy.chatgptdata.infrastructure.po.OpenAIProductPO;
 import com.jzy.chatgptdata.infrastructure.po.UserAccountPO;
 import com.jzy.chatgptdata.types.enums.OpenAIProductEnableModel;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -28,6 +29,7 @@ import java.util.List;
  *
  * @author 小傅哥
  */
+@Slf4j
 @Repository
 public class OrderRepository implements IOrderRepository {
 
@@ -43,7 +45,13 @@ public class OrderRepository implements IOrderRepository {
         OpenAIOrderPO openAIOrderPOReq = new OpenAIOrderPO();
         openAIOrderPOReq.setOpenid(shopCartEntity.getOpenid());
         openAIOrderPOReq.setProductId(shopCartEntity.getProductId());
-        OpenAIOrderPO openAIOrderPORes = openAIOrderDao.queryUnPayOrder(openAIOrderPOReq);
+        OpenAIOrderPO openAIOrderPORes;
+        try {
+            openAIOrderPORes = openAIOrderDao.queryUnPayOrder(openAIOrderPOReq);
+        } catch (Exception e) {
+            log.error("查询未支付订单异常", e);
+            return null;
+        }
         if (null == openAIOrderPORes) return null;
         return UnpaidOrderEntity.builder()
                 .openid(shopCartEntity.getOpenid())
@@ -84,7 +92,12 @@ public class OrderRepository implements IOrderRepository {
         openAIOrderPO.setTotalAmount(order.getTotalAmount());
         openAIOrderPO.setPayType(order.getPayTypeVO().getCode());
         openAIOrderPO.setPayStatus(PayStatusVO.WAIT.getCode());
-        openAIOrderDao.insert(openAIOrderPO);
+        try {
+            openAIOrderDao.insert(openAIOrderPO);
+        } catch (Exception e) {
+            log.error("插入订单异常", e);
+            throw e;
+        }
     }
 
     @Override
@@ -94,7 +107,13 @@ public class OrderRepository implements IOrderRepository {
         openAIOrderPO.setOrderId(payOrderEntity.getOrderId());
         openAIOrderPO.setPayUrl(payOrderEntity.getPayUrl());
         openAIOrderPO.setPayStatus(payOrderEntity.getPayStatus().getCode());
-        openAIOrderDao.updateOrderPayInfo(openAIOrderPO);
+        log.info("pay_url：length: {}",  payOrderEntity.getPayUrl().length());
+        try {
+            openAIOrderDao.updateOrderPayInfo(openAIOrderPO);
+        } catch (Exception e) {
+            log.error("更新订单支付信息异常", e);
+            throw e;
+        }
     }
 
     @Override

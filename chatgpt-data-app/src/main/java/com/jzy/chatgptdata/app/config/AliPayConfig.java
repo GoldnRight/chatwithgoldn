@@ -1,4 +1,4 @@
-package com.jzy.chatgptdata.types.config;
+package com.jzy.chatgptdata.app.config;
 
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;

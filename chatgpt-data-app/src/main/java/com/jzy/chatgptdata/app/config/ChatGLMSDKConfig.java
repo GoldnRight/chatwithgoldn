@@ -1,4 +1,4 @@
-package com.jzy.chatgptdata.types.config;
+package com.jzy.chatgptdata.app.config;
 
 import com.jzy.chatglmsdk18753goldn.session.OpenAiSession;
 import com.jzy.chatglmsdk18753goldn.session.OpenAiSessionFactory;

@@ -1,4 +1,4 @@
-package com.jzy.chatgptdata.types.config;
+package com.jzy.chatgptdata.app.config;
 
 //import com.jzy.chatgptdata.trigger.mq.OrderPaySuccessListener;
 import com.google.common.cache.Cache;

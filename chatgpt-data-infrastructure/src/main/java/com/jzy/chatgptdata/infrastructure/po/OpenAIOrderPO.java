@@ -37,7 +37,7 @@ public class OpenAIOrderPO {
     private Integer orderStatus;
     /** 订单金额 */
     private BigDecimal totalAmount;
-    /** 支付方式；0-微信支付 */
+    /** 支付方式；0-支付宝支付 */
     private Integer payType;
     /** 支付地址；创建支付后，获得的URL地址 */
     private String payUrl;
