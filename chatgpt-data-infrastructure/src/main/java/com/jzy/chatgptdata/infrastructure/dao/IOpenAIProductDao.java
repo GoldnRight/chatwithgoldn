@@ -17,4 +17,5 @@ public interface IOpenAIProductDao {
 
     List<OpenAIProductPO> queryProductList();
 
+    String queryProductModelTypes(Integer productId);
 }

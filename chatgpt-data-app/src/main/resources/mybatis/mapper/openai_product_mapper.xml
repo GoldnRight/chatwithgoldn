@@ -28,4 +28,10 @@
         ORDER BY sort
     </select>
 
+    <select id="queryProductModelTypes" resultType="java.lang.String">
+        SELECT product_model_types
+        FROM openai_product
+        WHERE product_id = #{productId}
+    </select>
+
 </mapper>
