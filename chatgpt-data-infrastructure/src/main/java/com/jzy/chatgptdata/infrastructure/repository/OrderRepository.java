@@ -168,6 +168,9 @@ public class OrderRepository implements IOrderRepository {
             int addAccountQuotaCount = userAccountDao.addAccountQuota(userAccountPOReq);
             if (1 != addAccountQuotaCount) throw new RuntimeException("addAccountQuotaCount update count is not equal 1");
         } else {
+            String modelTypes = openAIProductDao.queryProductModelTypes(openAIOrderPO.getProductId());
+            userAccountPOReq.setModelTypes(modelTypes);
+            userAccountPOReq.setStatus(0);
             userAccountDao.insert(userAccountPOReq);
         }
     }
