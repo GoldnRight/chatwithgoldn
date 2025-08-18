@@ -1,15 +1,12 @@
 package com.jzy.chatgptdata.domain.order.service;
 
-import com.jzy.chatgptdata.domain.order.model.aggregate.CreateOrderAggregate;
 import com.jzy.chatgptdata.domain.order.model.entity.*;
-import com.jzy.chatgptdata.domain.order.model.valobj.OrderStatusVO;
 import com.jzy.chatgptdata.domain.order.model.valobj.PayStatusVO;
 import com.jzy.chatgptdata.domain.order.repository.IOrderRepository;
 import com.alipay.api.AlipayApiException;
 import com.jzy.chatgptdata.types.common.Constants;
 import com.jzy.chatgptdata.types.exception.ChatGPTException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;

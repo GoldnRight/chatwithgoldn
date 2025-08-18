@@ -3,7 +3,6 @@ package com.jzy.chatgptdata.domain.openai.model.aggregates;
 import com.jzy.chatgptdata.types.enums.ChatGLMModel;
 import com.jzy.chatgptdata.domain.openai.model.entity.MessageEntity;
 import com.jzy.chatgptdata.types.common.Constants;
-//import com.jzy.chatgptdata.enums.ChatGPTModel;
 import com.jzy.chatgptdata.types.enums.OpenAiChannel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
