@@ -9,6 +9,7 @@ import com.jzy.chatgptdata.domain.openai.model.valobj.UserAccountStatusVO;
 import com.jzy.chatgptdata.domain.openai.service.rule.ILogicFilter;
 import com.jzy.chatgptdata.domain.openai.service.rule.factory.DefaultLogicFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,8 +22,16 @@ import org.springframework.stereotype.Component;
 @LogicStrategy(logicMode = DefaultLogicFactory.LogicModel.ACCOUNT_STATUS)
 public class AccountStatusFilter implements ILogicFilter<UserAccountQuotaEntity> {
 
+    @Value("${app.config.white-list}")
+    private String whiteListStr;
+
     @Override
     public RuleLogicEntity<ChatProcessAggregate> filter(ChatProcessAggregate chatProcess, UserAccountQuotaEntity data) throws Exception {
+        // 1. 白名单用户直接放行
+        if (chatProcess.isWhiteList(whiteListStr)) {
+            return RuleLogicEntity.<ChatProcessAggregate>builder()
+                    .type(LogicCheckTypeVO.SUCCESS).data(chatProcess).build();
+        }
         // 账户可用，直接放行
         if (UserAccountStatusVO.AVAILABLE.equals(data.getUserAccountStatusVO())) {
             return RuleLogicEntity.<ChatProcessAggregate>builder()

@@ -8,6 +8,7 @@ import com.jzy.chatgptdata.domain.openai.model.valobj.LogicCheckTypeVO;
 import com.jzy.chatgptdata.domain.openai.service.rule.ILogicFilter;
 import com.jzy.chatgptdata.domain.openai.service.rule.factory.DefaultLogicFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,8 +23,16 @@ import java.util.List;
 @LogicStrategy(logicMode = DefaultLogicFactory.LogicModel.MODEL_TYPE)
 public class ModelTypeFilter implements ILogicFilter<UserAccountQuotaEntity> {
 
+    @Value("${app.config.white-list}")
+    private String whiteListStr;
+
     @Override
     public RuleLogicEntity<ChatProcessAggregate> filter(ChatProcessAggregate chatProcess, UserAccountQuotaEntity data) throws Exception {
+        // 白名单用户直接放行
+        if (chatProcess.isWhiteList(whiteListStr)) {
+            return RuleLogicEntity.<ChatProcessAggregate>builder()
+                    .type(LogicCheckTypeVO.SUCCESS).data(chatProcess).build();
+        }
         // 1. 用户可用模型
         List<String> allowModelTypeList = data.getAllowModelTypeList();
         String modelType = chatProcess.getModel();
