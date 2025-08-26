@@ -3,6 +3,7 @@ package com.jzy.chatgptdata.domain.weixin.service.message;
 import com.jzy.chatgptdata.domain.weixin.model.entity.MessageTextEntity;
 import com.jzy.chatgptdata.domain.weixin.model.entity.UserBehaviorMessageEntity;
 import com.jzy.chatgptdata.domain.weixin.model.valobj.MsgTypeVO;
+import com.jzy.chatgptdata.domain.weixin.respository.IWeiXinRepository;
 import com.jzy.chatgptdata.domain.weixin.service.IWeiXinBehaviorService;
 import com.jzy.chatgptdata.types.exception.ChatGPTException;
 import com.jzy.chatgptdata.types.sdk.weixin.XmlUtil;
@@ -25,8 +26,11 @@ public class WeiXinBehaviorService implements IWeiXinBehaviorService {
     @Value("${wx.config.originalid}")
     private String originalId;
 
+//    @Resource
+//    private Cache<String, String> codeCache;
+
     @Resource
-    private Cache<String, String> codeCache;
+    private IWeiXinRepository repository;
 
     /**
      * 1. 用户的请求行文，分为事件event、消息text，这里我们只处理消息内容
@@ -43,18 +47,21 @@ public class WeiXinBehaviorService implements IWeiXinBehaviorService {
         if (MsgTypeVO.TEXT.getCode().equals(userBehaviorMessageEntity.getMsgType())) {
 
             // 缓存验证码，检查该openId用户是否短时间内申请过验证码
-            String isExistCode = codeCache.getIfPresent(userBehaviorMessageEntity.getOpenId());
+//            String isExistCode = codeCache.getIfPresent(userBehaviorMessageEntity.getOpenId());
 
-            // 判断验证码 - 不考虑验证码重复问题
-            if (StringUtils.isBlank(isExistCode)) {
-                // 创建验证码
-                String code = RandomStringUtils.randomNumeric(4);
-                //
-                // 双向缓存，根据不同的需求快速查找对应的数据
-                codeCache.put(code, userBehaviorMessageEntity.getOpenId());
-                codeCache.put(userBehaviorMessageEntity.getOpenId(), code);
-                isExistCode = code;
-            }
+            String code = repository.genCode(userBehaviorMessageEntity.getOpenId());
+
+
+//            // 判断验证码 - 不考虑验证码重复问题
+//            if (StringUtils.isBlank(isExistCode)) {
+//                // 创建验证码
+//                String code = RandomStringUtils.randomNumeric(4);
+//                //
+//                // 双向缓存，根据不同的需求快速查找对应的数据
+//                codeCache.put(code, userBehaviorMessageEntity.getOpenId());
+//                codeCache.put(userBehaviorMessageEntity.getOpenId(), code);
+//                isExistCode = code;
+//            }
 
             // 反馈信息[文本]
             MessageTextEntity res = new MessageTextEntity();
@@ -62,7 +69,7 @@ public class WeiXinBehaviorService implements IWeiXinBehaviorService {
             res.setFromUserName(originalId);
             res.setCreateTime(String.valueOf(System.currentTimeMillis() / 1000L));
             res.setMsgType("text");
-            res.setContent(String.format("您的验证码为：%s 有效期%d分钟！", isExistCode, 3));
+            res.setContent(String.format("您的验证码为：%s 有效期%d分钟！", code, 3));
             return XmlUtil.beanToXml(res);
         }
 

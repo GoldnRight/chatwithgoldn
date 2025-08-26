@@ -30,7 +30,7 @@ public class TimeoutCloseOrderJob {
     @Resource
     AlipayClient alipayClient;
 
-    @Scheduled(cron = "* */10 * * * ?")
+    @Scheduled(cron = "0 0/10 * * * ?")
     public void exec() {
         try {
             List<String> orderIds = orderService.queryTimeoutCloseOrderList();
