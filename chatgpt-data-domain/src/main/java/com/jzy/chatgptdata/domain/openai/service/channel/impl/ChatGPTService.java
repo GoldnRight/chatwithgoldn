@@ -24,9 +24,7 @@
 //import java.util.stream.Collectors;
 //
 ///**
-// * @author Fuzhengwei bugstack.cn @小傅哥
 // * @description ChatGPT 服务
-// * @create 2023-10-15 14:11
 // */
 //@Service
 //public class ChatGPTService implements OpenAiGroupService {

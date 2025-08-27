@@ -10,8 +10,6 @@ import java.math.BigDecimal;
 
 /**
  * 商品实体对象
- *
- * @author 小傅哥
  */
 @Data
 @Builder

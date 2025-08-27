@@ -13,7 +13,6 @@ import java.util.Date;
 /**
  * 订单实体
  *
- * @author 小傅哥
  */
 @Data
 @Builder

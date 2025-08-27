@@ -24,9 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Fuzhengwei bugstack.cn @小傅哥
  * @description 售卖服务
- * @create 2023-10-05 17:27
  */
 @Slf4j
 @RestController()
@@ -186,6 +184,7 @@ public class SaleController {
                     // 更新订单未已支付
                     orderService.changeOrderPaySuccess(tradeNo);
                     // 推送消息【自己的业务场景中可以使用MQ消息】
+                    // todo 优化成消息队列
                     eventBus.post(tradeNo);
                 }
             }

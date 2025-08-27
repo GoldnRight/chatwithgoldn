@@ -4,10 +4,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-/**
- * @author zhoumin
- * @create 2018-07-10 10:50
- */
 public class SignUtil {
     private static String token = "b8b6";
 

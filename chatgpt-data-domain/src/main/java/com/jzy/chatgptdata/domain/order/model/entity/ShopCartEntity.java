@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 
 /**
  * 购物车实体
- *
- * @author 小傅哥
  */
 @Data
 @Builder

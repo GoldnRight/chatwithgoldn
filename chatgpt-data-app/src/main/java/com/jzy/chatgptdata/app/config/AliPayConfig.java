@@ -11,6 +11,11 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties(AliPayConfigProperties.class)
 public class AliPayConfig {
 
+    /**
+     * 支付宝支付配置
+     * @param properties
+     * @return
+     */
     @Bean(name = "alipayClient")
     @ConditionalOnProperty(value = "alipay.enabled", havingValue = "true", matchIfMissing = false)
     public AlipayClient alipayClient(AliPayConfigProperties properties){
@@ -21,6 +26,7 @@ public class AliPayConfig {
                 properties.getCharset(),
                 properties.getAlipay_public_key(),
                 properties.getSign_type());
+
     }
 
 }

@@ -12,9 +12,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 /**
- * @author Fuzhengwei bugstack.cn @小傅哥
  * @description 鉴权服务
- * @create 2023-08-05 18:23
  */
 @Slf4j
 @Service

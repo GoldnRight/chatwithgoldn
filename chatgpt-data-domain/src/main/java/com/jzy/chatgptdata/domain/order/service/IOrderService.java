@@ -11,8 +11,6 @@ import java.util.List;
 
 /**
  * 订单服务
- *
- * @author 小傅哥
  */
 public interface IOrderService {
 

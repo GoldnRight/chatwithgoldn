@@ -19,9 +19,7 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 
 /**
- * @author Fuzhengwei bugstack.cn @小傅哥
  * @description
- * @create 2023-07-16 09:19
  */
 @Slf4j
 @RestController()

@@ -17,9 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 
 /**
- * @author Fuzhengwei bugstack.cn @小傅哥
  * @description 鉴权登录
- * @create 2023-08-05 18:46
  */
 @Slf4j
 @RestController()
@@ -73,7 +71,6 @@ public class AuthController {
 
 
     /**
-     * 【apix.natapp1.cc 是我在 <a href="https://natapp.cn/">https://natapp.cn</a> 购买的渠道，你需要自己购买一个使用】
      * 鉴权，根据鉴权结果返回 Token 码
      * curl -X POST \
      * http://apix.natapp1.cc/api/v1/auth/login \

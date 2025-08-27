@@ -19,9 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author Fuzhengwei bugstack.cn @小傅哥
  * @description ChatGLM 服务
- * @create 2023-10-15 14:12
  */
 @Slf4j
 @Service

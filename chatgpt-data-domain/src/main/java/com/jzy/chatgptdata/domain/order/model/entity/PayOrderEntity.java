@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 /**
  * 支付单实体对象
  *
- * @author 小傅哥
  */
 @Data
 @Builder

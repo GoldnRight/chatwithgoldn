@@ -13,9 +13,7 @@ import javax.annotation.Resource;
 import java.util.Map;
 
 /**
- * @author Fuzhengwei bugstack.cn @小傅哥
  * @description
- * @create 2023-07-22 21:11
  */
 @Service
 public class ChatService extends AbstractChatService {

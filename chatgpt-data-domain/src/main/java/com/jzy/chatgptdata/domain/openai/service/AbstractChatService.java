@@ -19,9 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Fuzhengwei bugstack.cn @小傅哥
  * @description 对话模型抽象类
- * @create 2023-07-22 21:12
  */
 @Slf4j
 public abstract class AbstractChatService implements IChatService {

@@ -5,6 +5,7 @@ import com.jzy.chatgptdata.domain.auth.model.valobj.AuthTypeVO;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.jzy.chatgptdata.domain.weixin.model.entity.WxConfigEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -12,23 +13,32 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 /**
- * @author Fuzhengwei bugstack.cn @小傅哥
  * @description
- * @create 2023-08-05 18:52
  */
 @Slf4j
 public abstract class AbstractAuthService implements IAuthService {
 
-    /** SecretKey 要替换为你自己的，并且最好是通过配置的方式使用 */
-    private static final String defaultBase64EncodedSecretKey = "B*B^D%fe";
-    private final String base64EncodedSecretKey = Base64.encodeBase64String(defaultBase64EncodedSecretKey.getBytes());
-    private final Algorithm algorithm = Algorithm.HMAC256(Base64.decodeBase64(Base64.encodeBase64String(defaultBase64EncodedSecretKey.getBytes())));
+    @Resource
+    private WxConfigEntity wxConfig;
+    // SecretKey 通过配置的方式使用
+//    private static final String defaultBase64EncodedSecretKey = "B*B^D%fe";
+    private String base64EncodedSecretKey;
+    private Algorithm algorithm;
+
+
+    @PostConstruct
+    private void init() {
+        this.base64EncodedSecretKey = Base64.encodeBase64String(wxConfig.getDefaultBase64EncodedSecretKey().getBytes());
+        this.algorithm = Algorithm.HMAC256(Base64.decodeBase64(this.base64EncodedSecretKey));
+    }
 
     @Override
     public AuthStateEntity doLogin(String code) {

@@ -5,8 +5,6 @@ import lombok.Getter;
 
 /**
  * 订单状态枚举
- *
- * @author 小傅哥
  */
 @Getter
 @AllArgsConstructor

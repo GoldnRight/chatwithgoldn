@@ -16,9 +16,7 @@ import javax.annotation.Resource;
 import java.util.List;
 
 /**
- * @author Fuzhengwei bugstack.cn @小傅哥
  * @description 超时关单任务
- * @create 2023-10-05 19:59
  */
 @Slf4j
 @Component()

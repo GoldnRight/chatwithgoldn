@@ -3,9 +3,7 @@ package com.jzy.chatgptdata.domain.openai.model.entity;
 import lombok.Data;
 
 /**
- * @author Fuzhengwei bugstack.cn @小傅哥
- * @description
- * @create 2023-07-16 08:47
+ * @description 聊天响应选项
  */
 @Data
 public class ChoiceEntity {

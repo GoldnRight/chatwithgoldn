@@ -10,9 +10,7 @@ import org.springframework.stereotype.Repository;
 import javax.annotation.Resource;
 
 /**
- * @author Fuzhengwei bugstack.cn @小傅哥
  * @description OpenAi 仓储服务
- * @create 2023-10-03 17:14
  */
 @Repository
 public class OpenAiRepository implements IOpenAiRepository {

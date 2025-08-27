@@ -9,8 +9,6 @@ import javax.annotation.Resource;
 
 /**
  * 支付成功回调消息
- *
- * @author 小傅哥
  */
 @Slf4j
 @Component

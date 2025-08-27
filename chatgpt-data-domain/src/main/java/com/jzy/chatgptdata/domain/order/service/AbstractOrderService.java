@@ -14,8 +14,6 @@ import java.util.Date;
 
 /**
  * 通过抽象类来定义下单的标准
- *
- * @author 小傅哥
  */
 @Slf4j
 public abstract class AbstractOrderService implements IOrderService {

@@ -11,9 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @author Fuzhengwei bugstack.cn @小傅哥
  * @description 用户账户额度实体对象
- * @create 2023-10-03 16:49
  */
 @Data
 @NoArgsConstructor

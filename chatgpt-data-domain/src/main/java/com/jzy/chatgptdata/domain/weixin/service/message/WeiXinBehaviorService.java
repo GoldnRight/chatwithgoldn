@@ -2,29 +2,27 @@ package com.jzy.chatgptdata.domain.weixin.service.message;
 
 import com.jzy.chatgptdata.domain.weixin.model.entity.MessageTextEntity;
 import com.jzy.chatgptdata.domain.weixin.model.entity.UserBehaviorMessageEntity;
+import com.jzy.chatgptdata.domain.weixin.model.entity.WxConfigEntity;
 import com.jzy.chatgptdata.domain.weixin.model.valobj.MsgTypeVO;
 import com.jzy.chatgptdata.domain.weixin.respository.IWeiXinRepository;
 import com.jzy.chatgptdata.domain.weixin.service.IWeiXinBehaviorService;
 import com.jzy.chatgptdata.types.exception.ChatGPTException;
 import com.jzy.chatgptdata.types.sdk.weixin.XmlUtil;
-import com.google.common.cache.Cache;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
 /**
- * @author Fuzhengwei bugstack.cn @小傅哥
  * @description 受理用户行为接口实现类
- * @create 2023-08-05 17:04
  */
 @Service
 public class WeiXinBehaviorService implements IWeiXinBehaviorService {
 
-    @Value("${wx.config.originalid}")
-    private String originalId;
+//    @Value("${wx.config.originalid}")
+//    private String originalId;
+
+    @Resource
+    private WxConfigEntity wxConfig;
 
 //    @Resource
 //    private Cache<String, String> codeCache;
@@ -66,7 +64,7 @@ public class WeiXinBehaviorService implements IWeiXinBehaviorService {
             // 反馈信息[文本]
             MessageTextEntity res = new MessageTextEntity();
             res.setToUserName(userBehaviorMessageEntity.getOpenId());
-            res.setFromUserName(originalId);
+            res.setFromUserName(wxConfig.getOriginalId());
             res.setCreateTime(String.valueOf(System.currentTimeMillis() / 1000L));
             res.setMsgType("text");
             res.setContent(String.format("您的验证码为：%s 有效期%d分钟！", code, 3));

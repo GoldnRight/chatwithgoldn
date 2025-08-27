@@ -14,9 +14,7 @@ import javax.annotation.Resource;
 import java.util.Date;
 
 /**
- * @author Fuzhengwei bugstack.cn @小傅哥
  * @description 微信公众号，验签和请求应答
- * @create 2023-08-05 16:50
  */
 @Slf4j
 @RestController
@@ -33,7 +31,7 @@ public class WeiXinPortalController {
     private IWeiXinBehaviorService weiXinBehaviorService;
 
     /**
-     * 处理微信服务器发来的get请求，进行签名的验证【apix.natapp1.cc 是我在 <a href="https://natapp.cn/">https://natapp.cn</a> 购买的渠道，你需要自己购买一个使用】
+     * 处理微信服务器发来的get请求，进行签名的验证
      * <a href="http://apix.natapp1.cc/api/v1/wx/portal/wxad979c0307864a66">http://apix.natapp1.cc/api/v1/wx/portal/wxad979c0307864a66</a>
      * <p>
      * appid     微信端AppID

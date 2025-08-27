@@ -71,10 +71,12 @@ chatglm:
 # appid：个人AppID
 # token：开通接口服务自定义设置
 wx:
+  enabled: true
   config:
-    originalid: gh_485263098cc1
+    originalId: gh_485263098cc1
     appid: wx0cca3987b4bc4258
     token: goldn
+    defaultBase64EncodedSecretKey: B*B^D%fe
 
 ## 数据库配置；SpringBoot 默认连接池为 HikariDataSource
 spring:

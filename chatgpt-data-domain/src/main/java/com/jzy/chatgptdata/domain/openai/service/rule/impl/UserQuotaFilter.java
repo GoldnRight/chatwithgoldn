@@ -15,9 +15,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 /**
- * @author Fuzhengwei bugstack.cn @小傅哥
  * @description 用户额度扣减规则过滤
- * @create 2023-10-03 16:48
  */
 @Slf4j
 @Component
