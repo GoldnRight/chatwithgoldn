@@ -1,13 +1,14 @@
 package com.jzy.chatgptdata.trigger.job;
 
+import com.jzy.chatgptdata.domain.order.producer.IOrderProducer;
 import com.jzy.chatgptdata.domain.order.service.IOrderService;
-import com.google.common.eventbus.EventBus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @description 订单补货任务
@@ -19,7 +20,12 @@ public class OrderReplenishmentJob {
     @Resource
     private IOrderService orderService;
     @Resource
-    private EventBus eventBus;
+    private IOrderProducer orderProducer;
+    @Resource
+    private ThreadPoolExecutor orderDeliveryThreadPoolExecutor;
+
+//    @Resource
+//    private EventBus eventBus;
 
     /**
      * 执行订单补货，超时3分钟，已支付，待发货未发货的订单
@@ -34,7 +40,9 @@ public class OrderReplenishmentJob {
             }
             for (String orderId : orderIds) {
                 log.info("定时任务，订单补货开始。orderId: {}", orderId);
-                eventBus.post(orderId);
+                orderDeliveryThreadPoolExecutor.execute(() -> {
+                    orderProducer.sendPaymentSuccessMessage(orderId);
+                });
             }
         } catch (Exception e) {
             log.error("定时任务，订单补货失败。", e);

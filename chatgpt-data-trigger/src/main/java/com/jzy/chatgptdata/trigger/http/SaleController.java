@@ -5,12 +5,12 @@ import com.jzy.chatgptdata.domain.auth.service.IAuthService;
 import com.jzy.chatgptdata.domain.order.model.entity.PayOrderEntity;
 import com.jzy.chatgptdata.domain.order.model.entity.ProductEntity;
 import com.jzy.chatgptdata.domain.order.model.entity.ShopCartEntity;
+import com.jzy.chatgptdata.domain.order.producer.IOrderProducer;
 import com.jzy.chatgptdata.domain.order.service.IOrderService;
 import com.jzy.chatgptdata.trigger.http.dto.SaleProductDTO;
 import com.jzy.chatgptdata.types.common.Constants;
 import com.jzy.chatgptdata.types.model.Response;
 import com.alibaba.fastjson.JSON;
-import com.google.common.eventbus.EventBus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @description 售卖服务
@@ -38,9 +39,15 @@ public class SaleController {
     @Resource
     private IOrderService orderService;
     @Resource
+    private IOrderProducer orderProducer;
+    @Resource
     private IAuthService authService;
     @Resource
-    private EventBus eventBus;
+    private ThreadPoolExecutor orderDeliveryThreadPoolExecutor;
+
+//    @Resource
+//    private EventBus eventBus;
+
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
 
@@ -184,8 +191,11 @@ public class SaleController {
                     // 更新订单未已支付
                     orderService.changeOrderPaySuccess(tradeNo);
                     // 推送消息【自己的业务场景中可以使用MQ消息】
-                    // todo 优化成消息队列
-                    eventBus.post(tradeNo);
+//                    eventBus.post(tradeNo);
+                    // 使用 Kafka 发送支付成功消息（异步处理，不阻塞主线程）
+                    orderDeliveryThreadPoolExecutor.execute(() -> {
+                        orderProducer.sendPaymentSuccessMessage(tradeNo);
+                    });
                 }
             }
             return "success";
@@ -194,5 +204,6 @@ public class SaleController {
             return "false";
         }
     }
+
 
 }

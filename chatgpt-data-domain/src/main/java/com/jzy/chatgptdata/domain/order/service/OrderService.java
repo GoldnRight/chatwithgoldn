@@ -112,7 +112,6 @@ public class OrderService extends AbstractOrderService {
         return payOrderEntity;
     }
 
-
     @Override
     public boolean changeOrderPaySuccess(String orderId, String transactionId, BigDecimal totalAmount, Date payTime) {
         return orderRepository.changeOrderPaySuccess(orderId, transactionId, totalAmount, payTime);

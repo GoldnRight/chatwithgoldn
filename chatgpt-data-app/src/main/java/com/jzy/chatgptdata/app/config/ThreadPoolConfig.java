@@ -12,10 +12,10 @@ import java.util.concurrent.*;
 @Slf4j
 @EnableAsync
 @Configuration
-@EnableConfigurationProperties(ThreadPoolConfigProperties.class)
+@EnableConfigurationProperties({ThreadPoolConfigProperties.class, OrderDeliveryThreadPoolConfigProperties.class})
 public class ThreadPoolConfig {
 
-    @Bean
+    @Bean(name = "threadPoolExecutor")
     @ConditionalOnMissingBean(ThreadPoolExecutor.class)
     public ThreadPoolExecutor threadPoolExecutor(ThreadPoolConfigProperties properties) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         // 实例化策略
@@ -46,5 +46,38 @@ public class ThreadPoolConfig {
                 Executors.defaultThreadFactory(),
                 handler);
     }
+
+    @Bean(name = "orderDeliveryThreadPoolExecutor")
+    @ConditionalOnMissingBean(ThreadPoolExecutor.class)
+    public ThreadPoolExecutor OrderDeliveryThreadPoolExecutor(ThreadPoolConfigProperties properties) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        // 实例化策略
+        RejectedExecutionHandler handler;
+        switch (properties.getPolicy()){
+            case "AbortPolicy":
+                handler = new ThreadPoolExecutor.AbortPolicy();
+                break;
+            case "DiscardPolicy":
+                handler = new ThreadPoolExecutor.DiscardPolicy();
+                break;
+            case "DiscardOldestPolicy":
+                handler = new ThreadPoolExecutor.DiscardOldestPolicy();
+                break;
+            case "CallerRunsPolicy":
+                handler = new ThreadPoolExecutor.CallerRunsPolicy();
+                break;
+            default:
+                handler = new ThreadPoolExecutor.AbortPolicy();
+                break;
+        }
+        // 创建线程池
+        return new ThreadPoolExecutor(properties.getCorePoolSize(),
+                properties.getMaxPoolSize(),
+                properties.getKeepAliveTime(),
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(properties.getBlockQueueSize()),
+                Executors.defaultThreadFactory(),
+                handler);
+    }
+
 
 }

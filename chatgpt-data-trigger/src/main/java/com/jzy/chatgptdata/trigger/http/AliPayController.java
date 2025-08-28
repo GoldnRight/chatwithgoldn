@@ -26,8 +26,8 @@ public class AliPayController {
     private String alipayPublicKey;
     @Resource
     private IOrderService orderService;
-    @Resource
-    private EventBus eventBus;
+//    @Resource
+//    private EventBus eventBus;
 
     /**
      * http://localhost:8091/api/v1/alipay/create_pay_order?openid=1001&productId=100001
@@ -90,7 +90,7 @@ public class AliPayController {
                     // 更新订单未已支付
                     orderService.changeOrderPaySuccess(tradeNo);
                     // 推送消息【自己的业务场景中可以使用MQ消息】
-                    eventBus.post(tradeNo);
+//                    eventBus.post(tradeNo);
                 }
             }
             return "success";

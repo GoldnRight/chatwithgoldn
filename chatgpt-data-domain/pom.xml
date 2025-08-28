@@ -48,20 +48,9 @@
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>cn.bugstack.chatgpt</groupId>-->
-<!--            <artifactId>chatgpt-sdk-java</artifactId>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>com.jzy</groupId>
             <artifactId>chatglm-sdk-18753-Goldn</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.jzy</groupId>
-            <artifactId>chatgpt-data-types</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.github.houbb</groupId>
@@ -75,6 +64,11 @@
         <dependency>
             <groupId>com.alipay.sdk</groupId>
             <artifactId>alipay-sdk-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jzy</groupId>
+            <artifactId>chatgpt-data-types</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

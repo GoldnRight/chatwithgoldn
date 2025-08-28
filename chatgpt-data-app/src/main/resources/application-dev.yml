@@ -112,6 +112,32 @@ redis:
       keep-alive: true
       password: 110100
       database: 2
+kafka:
+  bootstrap-servers: 120.26.196.227:9094
+  default-topic: opsxlab_test
+  consumer-group-id: chatgpt-data-group
+  listener-concurrency: 3
+  listener-poll-timeout: 3000
+  topics:
+    order-pay-success: order-pay-success-topic
+  consumer-group:
+    order-service: order-service-group
+  producer:
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    acks: "1"
+    retries: 3
+    batch-size: 16384
+    linger-ms: 5
+    buffer-memory: 33554432
+  consumer:
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    auto-offset-reset: earliest
+    enable-auto-commit: true
+    auto-commit-interval-ms: 1000
+    max-poll-records: 500
+    session-timeout-ms: 10000
 
 mybatis:
   mapper-locations: classpath:/mybatis/mapper/*.xml
