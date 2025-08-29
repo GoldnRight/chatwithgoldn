@@ -119,24 +119,33 @@ kafka:
   listener-concurrency: 3
   listener-poll-timeout: 3000
   topics:
-    order-pay-success: order-pay-success-topic
+    order-pay-success: order-pay-success-test
+    order-dead-letter: order-dead-letter-test
   consumer-group:
     order-service: order-service-group
   producer:
     key-serializer: org.apache.kafka.common.serialization.StringSerializer
     value-serializer: org.apache.kafka.common.serialization.StringSerializer
-    acks: "1"
-    retries: 3
-    batch-size: 16384
-    linger-ms: 5
-    buffer-memory: 33554432
+    # 可靠性强化配置
+    acks: "all"                     # 关键变更：所有ISR副本确认
+    enable.idempotence: true        # 启用幂等性（防止重复）
+    max.in.flight.requests.per.connection: 1 # 保证消息顺序
+    # 重试策略优化
+    retries: 10                     # 增加重试次数
+    delivery.timeout.ms: 120000     # 总交付超时时间（2分钟）
+    request.timeout.ms: 30000       # 单次请求超时
+    # 其他优化
+    linger-ms: 20                   # 适当增加提高吞吐
+    compression.type: gzip          # 压缩节省带宽
+    batch-size: 32768               # 调大批次（需权衡延迟）
+    # 自定义
+    max-retries: 5
   consumer:
     key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    auto-offset-reset: earliest
-    enable-auto-commit: true
-    auto-commit-interval-ms: 1000
-    max-poll-records: 500
+    auto-offset-reset: latest
+    enable-auto-commit: false
+    max-poll-records: 50
     session-timeout-ms: 10000
 
 mybatis:

@@ -156,4 +156,14 @@ public class OrderService extends AbstractOrderService {
     public List<ProductEntity> queryProductList() {
         return orderRepository.queryProductList();
     }
+
+    @Override
+    public void makeOrderPaySuccess(String orderId) {
+        orderRepository.markAsProcessed(orderId);
+    }
+
+    @Override
+    public boolean isOrderPaySuccess(String orderId) {
+        return orderRepository.isAlreadyProcessed(orderId);
+    }
 }

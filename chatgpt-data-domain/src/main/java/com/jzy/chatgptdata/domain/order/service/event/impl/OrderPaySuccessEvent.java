@@ -33,5 +33,15 @@ public class OrderPaySuccessEvent implements IOrderEvent {
             // 可以根据需要添加重试或补偿逻辑
         }
     }
+    @Override
+    public void markAsProcessed(String orderId) {
+        orderService.makeOrderPaySuccess(orderId);
+    }
+
+    @Override
+    public boolean isAlreadyProcessed(String orderId) {
+        return orderService.isOrderPaySuccess(orderId);
+    }
+
 
 }

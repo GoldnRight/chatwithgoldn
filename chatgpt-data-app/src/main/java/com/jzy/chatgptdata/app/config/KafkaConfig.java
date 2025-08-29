@@ -1,22 +1,27 @@
 package com.jzy.chatgptdata.app.config;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.TopicPartition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
-import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.listener.*;
 import org.springframework.kafka.support.converter.StringJsonMessageConverter;
+import org.springframework.util.backoff.ExponentialBackOff;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Configuration
 public class KafkaConfig {
 
@@ -69,6 +74,7 @@ public class KafkaConfig {
         // 基本配置
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConfigProperties.getBootstrapServers());
         props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaConfigProperties.getConsumerGroupId());
+        props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed"); // 只读已提交消息
 
         // 从配置属性中获取消费者配置
         props.putAll(kafkaConfigProperties.getConsumer().toMap());
@@ -96,11 +102,51 @@ public class KafkaConfig {
         // 设置并发消费者数量
         factory.setConcurrency(kafkaConfigProperties.getListenerConcurrency());
 
+        // 配置错误处理器
+        factory.setCommonErrorHandler(errorHandler());
+
+        // 设置ACK模式为手动立即提交
+        ContainerProperties containerProperties = factory.getContainerProperties();
+        containerProperties.setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+
         // 设置poll超时时间
         factory.getContainerProperties().setPollTimeout(kafkaConfigProperties.getListenerPollTimeout());
 
         return factory;
     }
+
+    @Bean
+    public CommonErrorHandler errorHandler() {
+        // 重试策略：最多重试3次，每次间隔1秒
+        ExponentialBackOff backOff = new ExponentialBackOff(1000L, 2);
+        backOff.setMaxInterval(5000L);
+        backOff.setMaxElapsedTime(15000L);
+
+        // 创建死信发布器
+        DeadLetterPublishingRecoverer dlqRecoverer = new DeadLetterPublishingRecoverer(
+                kafkaTemplate(),
+                (record, ex) -> new TopicPartition(record.topic() + ".DLQ", record.partition())
+        );
+
+        // 配置错误处理器
+        return new DefaultErrorHandler(
+                dlqRecoverer,
+                backOff
+        );
+    }
+
+    @Bean
+    public RecordInterceptor<String, String> recordInterceptor() {
+        return new RecordInterceptor<String, String>() {
+            @Override
+            public ConsumerRecord<String, String> intercept(ConsumerRecord<String, String> record) {
+                log.debug("Intercepted message: key={}, partition={}, offset={}",
+                        record.key(), record.partition(), record.offset());
+                return record;
+            }
+        };
+    }
+
 
     /**
      * Kafka管理客户端，用于创建主题等管理操作

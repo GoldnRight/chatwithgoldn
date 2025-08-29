@@ -1,16 +1,22 @@
 package com.jzy.chatgptdata.trigger.listener;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.Subscribe;
 import com.jzy.chatgptdata.domain.order.service.event.IOrderEvent;
 import com.jzy.chatgptdata.domain.order.service.IOrderService;
 import com.jzy.chatgptdata.infrastructure.kafka.dto.KafkaOrderPaySuccessMessage;
+import com.jzy.chatgptdata.infrastructure.kafka.producer.DeadLetterProducer;
+import com.jzy.chatgptdata.types.exception.NonRecoverableException;
+import com.jzy.chatgptdata.types.exception.RecoverableException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.concurrent.TimeoutException;
 
 /**
  * 支付成功回调消息
@@ -25,26 +31,64 @@ public class OrderPaySuccessListener {
     @Resource
     private ObjectMapper objectMapper;
 
+    @Resource
+    private DeadLetterProducer deadLetterPublisher;
+
     @KafkaListener(
             topics = "${kafka.topics.order-pay-success:order-pay-success}",
-            groupId = "${kafka.consumer-group.order-service:order-service-group}"
+            groupId = "${kafka.consumer-group.order-service:order-service-group}",
+            containerFactory = "kafkaListenerContainerFactory"
     )
-    public void onOrderPaySuccess(ConsumerRecord<String, String> record) {
+    public void onOrderPaySuccess(ConsumerRecord<String, String> record, Acknowledgment ack) {
+        String message = record.value();
+        log.info("Received order payment success message: {}", message);
+
         try {
-            log.info("Received order payment success message: {}", record.value());
+            // 1. 反序列化消息
+            KafkaOrderPaySuccessMessage payload = deserializeMessage(message);
 
-            // 使用基础设施层的DTO进行反序列化
-            KafkaOrderPaySuccessMessage message = objectMapper.readValue(
-                    record.value(),
-                    KafkaOrderPaySuccessMessage.class
-            );
+            // 2. 幂等性检查
+            if (orderOrderSuccessEvent.isAlreadyProcessed(payload.getOrderId())) {
+                log.warn("Duplicate message detected for order: {}", payload.getOrderId());
+                ack.acknowledge(); // 确认消息避免阻塞
+                return;
+            }
 
-            orderOrderSuccessEvent.handleOrderPaySuccess(message.getOrderId());
+            // 3. 业务处理
+            orderOrderSuccessEvent.handleOrderPaySuccess(payload.getOrderId());
 
-            log.info("Successfully processed order payment: {}", message.getOrderId());
+            // 4. 标记处理成功
+            orderOrderSuccessEvent.markAsProcessed(payload.getOrderId());
 
-        } catch (Exception e) {
-            log.error("Failed to process order payment success message: {}", record.value(), e);
+            log.info("Successfully processed order payment: {}", payload.getOrderId());
+
+            // 5. 手动提交偏移量
+            ack.acknowledge();
+
+        } catch (RecoverableException e) {
+            // 可恢复异常（如网络问题）
+            log.warn("Recoverable error processing message: {}", message, e);
+            // 不提交偏移量，等待重试
+
+        } catch (NonRecoverableException e) {
+            // 不可恢复异常（如数据格式错误）
+            log.error("Non-recoverable error processing message: {}", message, e);
+            deadLetterPublisher.publishToDlq(record, e);
+            ack.acknowledge(); // 确认消息避免阻塞
+
+        } catch (Exception  e) {
+            // 未知异常处理
+            log.error("Unexpected error processing message: {}", message, e);
+            deadLetterPublisher.publishToDlq(record, e);
+            ack.acknowledge(); // 确认消息避免阻塞
+        }
+    }
+
+    private KafkaOrderPaySuccessMessage deserializeMessage(String message) throws JsonProcessingException  {
+        try {
+            return objectMapper.readValue(message, KafkaOrderPaySuccessMessage.class);
+        } catch (JsonProcessingException e) {
+            throw new NonRecoverableException ("Invalid message format", e);
         }
     }
 

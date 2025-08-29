@@ -11,8 +11,11 @@ import com.jzy.chatgptdata.infrastructure.dao.IUserAccountDao;
 import com.jzy.chatgptdata.infrastructure.po.OpenAIOrderPO;
 import com.jzy.chatgptdata.infrastructure.po.OpenAIProductPO;
 import com.jzy.chatgptdata.infrastructure.po.UserAccountPO;
+import com.jzy.chatgptdata.infrastructure.redis.IRedisService;
+import com.jzy.chatgptdata.types.common.RedisConstants;
 import com.jzy.chatgptdata.types.enums.OpenAIProductEnableModel;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -37,6 +40,11 @@ public class OrderRepository implements IOrderRepository {
     private IOpenAIProductDao openAIProductDao;
     @Resource
     private IUserAccountDao userAccountDao;
+
+    @Resource
+    private IRedisService redisService;
+
+    private static final String ORDER_PAY_SUCCESS_KEY = RedisConstants.ORDER_PAY_SUCCESS;
 
     @Override
     public UnpaidOrderEntity queryUnPayOrder(ShopCartEntity shopCartEntity) {
@@ -209,4 +217,16 @@ public class OrderRepository implements IOrderRepository {
         return productEntityList;
     }
 
+    @Override
+    public void markAsProcessed(String orderId) {
+        String key = ORDER_PAY_SUCCESS_KEY + "_" + orderId;
+        redisService.setValue(key, orderId, 30 * 60 * 1000);
+    }
+
+    @Override
+    public boolean isAlreadyProcessed(String orderId) {
+        String key = ORDER_PAY_SUCCESS_KEY + "_" + orderId;
+        String orderIdInRedis = redisService.getValue(key);
+        return orderIdInRedis != null && orderIdInRedis.equals(orderId);
+    }
 }

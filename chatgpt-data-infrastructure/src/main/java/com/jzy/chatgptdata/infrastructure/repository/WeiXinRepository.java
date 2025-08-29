@@ -2,6 +2,7 @@ package com.jzy.chatgptdata.infrastructure.repository;
 
 import com.jzy.chatgptdata.domain.weixin.respository.IWeiXinRepository;
 import com.jzy.chatgptdata.infrastructure.redis.IRedisService;
+import com.jzy.chatgptdata.types.common.RedisConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 @Repository
 public class WeiXinRepository implements IWeiXinRepository {
 
-    private static final String Key = "weixin_code";
+    private static final String Key = RedisConstants.WEXIN_CODE;
 
     @Resource
     private IRedisService redisService;

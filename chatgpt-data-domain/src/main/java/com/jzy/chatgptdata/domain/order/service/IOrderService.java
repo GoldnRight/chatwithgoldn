@@ -69,4 +69,17 @@ public interface IOrderService {
      */
     List<ProductEntity> queryProductList();
 
+    /**
+     * 标记订单已处理
+     * @param orderId
+     */
+    void makeOrderPaySuccess(String orderId);
+
+    /**
+     * 订单幂等性检验
+     * @param orderId
+     * @return
+     */
+    boolean isOrderPaySuccess(String orderId);
+
 }

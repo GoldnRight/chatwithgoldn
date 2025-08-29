@@ -35,4 +35,9 @@ public interface IOrderRepository {
     boolean changeOrderClose(String orderId);
 
     List<ProductEntity> queryProductList();
+
+    void markAsProcessed(String orderId);
+
+    boolean isAlreadyProcessed(String orderId);
+
 }
