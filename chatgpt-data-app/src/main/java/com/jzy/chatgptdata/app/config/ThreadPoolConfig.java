@@ -15,9 +15,9 @@ import java.util.concurrent.*;
 @EnableConfigurationProperties({ThreadPoolConfigProperties.class, OrderDeliveryThreadPoolConfigProperties.class})
 public class ThreadPoolConfig {
 
-    @Bean(name = "threadPoolExecutor")
+    @Bean(name = "prometheusCollectionThreadPoolExecutor")
     @ConditionalOnMissingBean(ThreadPoolExecutor.class)
-    public ThreadPoolExecutor threadPoolExecutor(ThreadPoolConfigProperties properties) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public ThreadPoolExecutor prometheusCollectionThreadPoolExecutor(ThreadPoolConfigProperties properties) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         // 实例化策略
         RejectedExecutionHandler handler;
         switch (properties.getPolicy()){

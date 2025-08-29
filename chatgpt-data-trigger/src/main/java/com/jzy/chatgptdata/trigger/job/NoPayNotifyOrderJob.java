@@ -6,6 +6,7 @@ import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.jzy.chatgptdata.domain.order.producer.IOrderProducer;
 import com.jzy.chatgptdata.domain.order.service.IOrderService;
+import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -41,6 +42,7 @@ public class NoPayNotifyOrderJob {
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
 
+    @Timed(value = "no_pay_notify_order_job", description = "定时任务，订单支付状态更新")
     @Scheduled(cron = "0 0/1 * * * ?")
     public void exec() {
         try {

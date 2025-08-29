@@ -1,4 +1,4 @@
-# /usr/local/bin/docker-compose -f /docs/dev-ops/environment/environment-docker-compose.yml up -d
+# /usr/local/bin/docker-compose.yml -f /docs/dev-ops/environment/environment-docker-compose.yml.yml up -d
 version: '3'
 services:
   # MySQL 5.7
