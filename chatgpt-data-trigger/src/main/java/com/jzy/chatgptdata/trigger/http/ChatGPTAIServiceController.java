@@ -16,6 +16,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.UUID;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +34,9 @@ public class ChatGPTAIServiceController {
 
     @Resource
     private IAuthService authService;
+
+    @Resource
+    private ThreadPoolExecutor prometheusCollectionThreadPoolExecutor;
 
     @PostConstruct
     public void init() {
@@ -70,6 +75,11 @@ public class ChatGPTAIServiceController {
             response.setCharacterEncoding("UTF-8");
             response.setHeader("Cache-Control", "no-cache");
 
+            // Prometheus埋点
+            prometheusCollectionThreadPoolExecutor.submit(() -> {
+
+            });
+
 //            // 2. 构建异步响应对象【对 Token 过期拦截】
             ResponseBodyEmitter emitter = new ResponseBodyEmitter(3 * 60 * 1000L);
             boolean success = authService.checkToken(token);
@@ -94,6 +104,7 @@ public class ChatGPTAIServiceController {
             ChatProcessAggregate chatProcessAggregate = ChatProcessAggregate.builder()
                     .openid(openid)
                     .model(request.getModel())
+                    .sessionId(UUID.randomUUID().toString().replace("-", ""))
                     .messages(request.getMessages().stream()
                             .map(entity -> MessageEntity.builder()
                                     .role(entity.getRole())
@@ -102,6 +113,7 @@ public class ChatGPTAIServiceController {
                                     .build())
                             .collect(Collectors.toList()))
                     .build();
+
 
             // 5. 请求结果&返回
             return chatService.completions(emitter, chatProcessAggregate);

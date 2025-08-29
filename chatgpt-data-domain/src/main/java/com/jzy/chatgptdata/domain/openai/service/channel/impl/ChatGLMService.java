@@ -4,9 +4,13 @@ import com.jzy.chatglmsdk18753goldn.model.*;
 import com.jzy.chatglmsdk18753goldn.session.OpenAiSession;
 import com.jzy.chatgptdata.domain.openai.model.aggregates.ChatProcessAggregate;
 import com.jzy.chatgptdata.domain.openai.service.channel.OpenAiGroupService;
+import com.jzy.chatgptdata.types.common.PrometheusCollectionConstants;
 import com.jzy.chatgptdata.types.enums.ChatGLMModel;
 import com.jzy.chatgptdata.types.exception.ChatGPTException;
 import com.alibaba.fastjson.JSON;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
@@ -15,7 +19,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 
 import javax.annotation.Resource;
+import java.time.Duration;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -27,6 +36,17 @@ public class ChatGLMService implements OpenAiGroupService {
 
     @Resource
     protected OpenAiSession chatGlMOpenAiSession;
+
+    @Resource
+    private MeterRegistry registry;
+
+
+    @Resource
+    private ThreadPoolExecutor prometheusCollectionThreadPoolExecutor;
+
+    // 首字延迟统计
+    private final Map<String, Long> firstTokenTimeMap = new ConcurrentHashMap<>();
+
 
     @Override
     public void doMessageResponse(ChatProcessAggregate chatProcess, ResponseBodyEmitter emitter) throws Exception {
@@ -43,6 +63,7 @@ public class ChatGLMService implements OpenAiGroupService {
         request.setModel(Model.valueOf(ChatGLMModel.get(chatProcess.getModel()).name())); // chatGLM_6b_SSE、chatglm_lite、chatglm_lite_32k、chatglm_std、chatglm_pro
         request.setPrompt(prompts);
 
+        long startTime = System.currentTimeMillis();
         chatGlMOpenAiSession.completions(request, new EventSourceListener() {
             @Override
             public void onEvent(EventSource eventSource, @Nullable String id, @Nullable String type, String data) {
@@ -50,6 +71,20 @@ public class ChatGLMService implements OpenAiGroupService {
 
                 // 发送信息
                 if (EventType.add.getCode().equals(type)) {
+                    // Prometheus 埋点
+                    prometheusCollectionThreadPoolExecutor.submit(() ->{
+                        try {
+                            if (firstTokenTimeMap.putIfAbsent(chatProcess.getSessionId(), System.currentTimeMillis()) == null) {
+                                // 记录首字延迟
+                                Timer.builder(PrometheusCollectionConstants.CHAT_FIRST_TOKEN_LATENCY)
+                                        .tags("model", chatProcess.getModel())
+                                        .register(registry)
+                                        .record(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS);
+                            }
+                        } catch (Exception e) {
+                            log.error("首字延迟埋点异常", e);
+                        }
+                    });
                     try {
                         emitter.send(response.getData());
                     } catch (Exception e) {
@@ -67,6 +102,29 @@ public class ChatGLMService implements OpenAiGroupService {
             @Override
             public void onClosed(EventSource eventSource) {
                 emitter.complete();
+                // Prometheus 埋点
+                prometheusCollectionThreadPoolExecutor.submit(() -> {
+                    try {
+                        firstTokenTimeMap.remove(chatProcess.getSessionId());
+                        String[] tags = new String[]{
+                                "model", chatProcess.getModel()
+                        };
+                        // 次数统计
+                        Counter counter = Counter.builder(PrometheusCollectionConstants.CHAT_COMPLETIONS_TOTAL)
+                                .tags(tags)
+                                .register(registry);
+                        counter.increment();
+
+                        // 接口耗时统计（修正计算方式）
+                        Timer.builder(PrometheusCollectionConstants.CHAT_COMPLETIONS_DURATION)
+                                .tags(tags)
+                                .register(registry)
+                                .record(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS);
+                    } catch (Exception e) {
+                        log.error("会话统计埋点异常", e);
+                    }
+                });
+
             }
 
         });

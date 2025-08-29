@@ -26,6 +26,8 @@ public class ChatProcessAggregate {
     private String model = ChatGLMModel.CHATGLM_6B_SSE.getCode();
     /** 问题描述 */
     private List<MessageEntity> messages;
+    /** 会话ID */
+    private String sessionId;
 
     public boolean isWhiteList(String whiteListStr) {
         String[] whiteList = whiteListStr.split(Constants.SPLIT);
