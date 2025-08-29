@@ -4,7 +4,11 @@ import com.jzy.chatgptdata.domain.weixin.model.entity.MessageTextEntity;
 import com.jzy.chatgptdata.domain.weixin.model.entity.UserBehaviorMessageEntity;
 import com.jzy.chatgptdata.domain.weixin.service.IWeiXinBehaviorService;
 import com.jzy.chatgptdata.domain.weixin.service.IWeiXinValidateService;
+import com.jzy.chatgptdata.types.common.PrometheusCollectionConstants;
 import com.jzy.chatgptdata.types.sdk.weixin.XmlUtil;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @description 微信公众号，验签和请求应答
@@ -29,6 +35,12 @@ public class WeiXinPortalController {
 
     @Resource
     private IWeiXinBehaviorService weiXinBehaviorService;
+
+    @Resource
+    private MeterRegistry registry;
+
+    @Resource
+    private ThreadPoolExecutor prometheusCollectionThreadPoolExecutor;
 
     /**
      * 处理微信服务器发来的get请求，进行签名的验证
@@ -88,7 +100,28 @@ public class WeiXinPortalController {
                     .build();
 
             // 受理消息
+            Long startTime = System.currentTimeMillis();
             String result = weiXinBehaviorService.acceptUserBehavior(entity);
+            // Prometheus 埋点
+            prometheusCollectionThreadPoolExecutor.submit(() -> {
+                String tags[] = new String[]{
+                        "message_type", message.getMsgType(),
+                        "open_id",openid
+                };
+                Counter counter = Counter.builder(PrometheusCollectionConstants.WEXIN_BEHAVIOR_TOTAL)
+                        .tags(tags)
+                        .register(registry);
+                counter.increment();
+                // 微信受理消息耗时统计
+                Timer.builder(PrometheusCollectionConstants.WEXIN_BEHAVIOR_DURATION)
+                        .tags(
+                                "message_type", message.getMsgType(),
+                                "open_id",openid
+                        )
+                        .register(registry)
+                        .record(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS);
+
+            });
             log.info("接收微信公众号信息请求{}完成 {}", openid, result);
             return result;
         } catch (Exception e) {

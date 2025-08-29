@@ -1,5 +1,6 @@
 package com.jzy.chatgptdata.domain.order.service;
 
+import com.alipay.api.response.AlipayTradePagePayResponse;
 import com.jzy.chatgptdata.domain.order.model.aggregate.CreateOrderAggregate;
 import com.jzy.chatgptdata.domain.order.model.entity.OrderEntity;
 import com.jzy.chatgptdata.domain.order.model.entity.PayOrderEntity;
@@ -11,6 +12,10 @@ import com.alipay.api.AlipayClient;
 import com.alipay.api.request.AlipayTradePagePayRequest;
 import com.jzy.chatgptdata.domain.order.model.valobj.PayStatusVO;
 import com.jzy.chatgptdata.domain.order.model.valobj.PayTypeVO;
+import com.jzy.chatgptdata.types.common.PrometheusCollectionConstants;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +25,8 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -31,6 +38,13 @@ public class OrderService extends AbstractOrderService {
     private String returnUrl;
     @Resource
     private AlipayClient alipayClient;
+
+    @Resource
+    private MeterRegistry registry;
+
+    @Resource
+    private ThreadPoolExecutor prometheusCollectionThreadPoolExecutor;
+
 
     @Override
     protected OrderEntity doSaveOrder(String openid, ProductEntity productEntity) {
@@ -99,8 +113,29 @@ public class OrderService extends AbstractOrderService {
         bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");
         request.setBizContent(bizContent.toString());
 
-        String form = alipayClient.pageExecute(request).getBody();
+        Long startTime = System.currentTimeMillis();
+        AlipayTradePagePayResponse alipayTradePagePayResponse = alipayClient.pageExecute(request);
+        prometheusCollectionThreadPoolExecutor.submit(() -> {
+            String [] tags = new String[]{
+                    "code", alipayTradePagePayResponse.getCode(),
+                    "sub_code", alipayTradePagePayResponse.getSubCode() != null ? alipayTradePagePayResponse.getSubCode() : "null",
+                    "productName", productName,
+                    "productId", String.valueOf(productId)
+            };
+            // 次数统计
+            Counter counter = Counter.builder(PrometheusCollectionConstants.ALIPAY_USE_TOTAL)
+                    .tags(tags)
+                    .register(registry);
+            counter.increment();
 
+            // 接口耗时统计（修正计算方式）
+            Timer.builder(PrometheusCollectionConstants.ALIPAY_USE_DURATION)
+                    .tags(tags)
+                    .register(registry)
+                    .record(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS);
+
+        });
+        String form = alipayTradePagePayResponse.getBody();
         PayOrderEntity payOrderEntity = new PayOrderEntity();
         payOrderEntity.setOpenid(openid);
         payOrderEntity.setOrderId(orderId);
