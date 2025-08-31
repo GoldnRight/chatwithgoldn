@@ -1,13 +1,17 @@
 package com.jzy.chatgptdata.domain.openai.service.channel.impl;
 
-import com.jzy.chatglmsdk18753goldn.model.*;
+import com.jzy.chatglmsdk18753goldn.domain.zhipu.EventType;
+import com.jzy.chatglmsdk18753goldn.domain.zhipu.Model;
+import com.jzy.chatglmsdk18753goldn.domain.zhipu.Role;
+import com.jzy.chatglmsdk18753goldn.domain.zhipu.chat.ChatCompletionRequest;
+import com.jzy.chatglmsdk18753goldn.domain.zhipu.chat.ChatCompletionResponse;
 import com.jzy.chatglmsdk18753goldn.session.OpenAiSession;
+import com.alibaba.fastjson.JSON;
 import com.jzy.chatgptdata.domain.openai.model.aggregates.ChatProcessAggregate;
 import com.jzy.chatgptdata.domain.openai.service.channel.OpenAiGroupService;
 import com.jzy.chatgptdata.types.common.PrometheusCollectionConstants;
 import com.jzy.chatgptdata.types.enums.ChatGLMModel;
 import com.jzy.chatgptdata.types.exception.ChatGPTException;
-import com.alibaba.fastjson.JSON;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -19,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 
 import javax.annotation.Resource;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,9 +62,16 @@ public class ChatGLMService implements OpenAiGroupService {
                 .collect(Collectors.toList());
 
         // 2. 封装参数
-        ChatCompletionRequest request = new ChatCompletionRequest();
-        request.setModel(Model.valueOf(ChatGLMModel.get(chatProcess.getModel()).name())); // chatGLM_6b_SSE、chatglm_lite、chatglm_lite_32k、chatglm_std、chatglm_pro
-        request.setPrompt(prompts);
+        ChatCompletionRequest request = null;
+        try {
+            request = new ChatCompletionRequest();
+            request.setModel(Model.valueOf(ChatGLMModel.get(chatProcess.getModel()).name())); // chatGLM_6b_SSE、chatglm_lite、chatglm_lite_32k、chatglm_std、chatglm_pro
+            request.setMessages(prompts);
+            request.setPrompt(prompts);
+        } catch (IllegalArgumentException e) {
+            log.error("ChatGLM模型参数异常", e);
+            throw new RuntimeException(e);
+        }
 
         long startTime = System.currentTimeMillis();
         chatGlMOpenAiSession.completions(request, new EventSourceListener() {
@@ -77,7 +87,7 @@ public class ChatGLMService implements OpenAiGroupService {
                             if (firstTokenTimeMap.putIfAbsent(chatProcess.getSessionId(), System.currentTimeMillis()) == null) {
                                 // 记录首字延迟
                                 Timer.builder(PrometheusCollectionConstants.CHAT_FIRST_TOKEN_LATENCY)
-                                        .tags("model", chatProcess.getModel())
+                                        .tags("model", chatProcess.getModel() == null ? "null" : chatProcess.getModel())
                                         .register(registry)
                                         .record(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS);
                             }
@@ -107,7 +117,7 @@ public class ChatGLMService implements OpenAiGroupService {
                     try {
                         firstTokenTimeMap.remove(chatProcess.getSessionId());
                         String[] tags = new String[]{
-                                "model", chatProcess.getModel()
+                                "model", chatProcess.getModel() == null ? "null" : chatProcess.getModel(),
                         };
                         // 次数统计
                         Counter counter = Counter.builder(PrometheusCollectionConstants.CHAT_COMPLETIONS_TOTAL)
@@ -124,6 +134,7 @@ public class ChatGLMService implements OpenAiGroupService {
                         log.error("会话统计埋点异常", e);
                     }
                 });
+
 
             }
 

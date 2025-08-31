@@ -75,11 +75,6 @@ public class ChatGPTAIServiceController {
             response.setCharacterEncoding("UTF-8");
             response.setHeader("Cache-Control", "no-cache");
 
-            // Prometheus埋点
-            prometheusCollectionThreadPoolExecutor.submit(() -> {
-
-            });
-
 //            // 2. 构建异步响应对象【对 Token 过期拦截】
             ResponseBodyEmitter emitter = new ResponseBodyEmitter(3 * 60 * 1000L);
             boolean success = authService.checkToken(token);
