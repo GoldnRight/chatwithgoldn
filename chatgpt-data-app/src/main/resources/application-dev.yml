@@ -55,16 +55,17 @@ thread:
         policy: CallerRunsPolicy
 
 # ChatGLM SDK Config
-chatglm:
+chat:
   sdk:
-    zhipu:
       config:
         # 状态；true = 开启、false 关闭
         enabled: true
         # 官网地址
-        api-host: https://open.bigmodel.cn/
+        api-host-GLM: https://open.bigmodel.cn/
         # 官网申请 https://open.bigmodel.cn/usercenter/apikeys - 自己可申请
-        api-secret-key: bb70cc6355ef46cdb890e7b5359cf9c2.qD9j4XV15Dwa1kD8
+        api-secret-key-GLM: bb70cc6355ef46cdb890e7b5359cf9c2.qD9j4XV15Dwa1kD8
+        api-host-Qwen: https://dashscope.aliyuncs.com/
+        api-secret-key-Qwen: sk-a53f260c382b48fda4519294cbe91284
 
 # 微信公众号配置信息
 # originalid：原始ID

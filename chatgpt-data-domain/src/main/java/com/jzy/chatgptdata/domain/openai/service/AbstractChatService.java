@@ -7,6 +7,7 @@ import com.jzy.chatgptdata.domain.openai.model.valobj.LogicCheckTypeVO;
 import com.jzy.chatgptdata.domain.openai.repository.IOpenAiRepository;
 import com.jzy.chatgptdata.domain.openai.service.channel.OpenAiGroupService;
 import com.jzy.chatgptdata.domain.openai.service.channel.impl.ChatGLMService;
+import com.jzy.chatgptdata.domain.openai.service.channel.impl.QwenService;
 import com.jzy.chatgptdata.domain.openai.service.rule.factory.DefaultLogicFactory;
 import com.jzy.chatgptdata.types.common.Constants;
 import com.jzy.chatgptdata.types.enums.OpenAiChannel;
@@ -26,8 +27,9 @@ public abstract class AbstractChatService implements IChatService {
 
     private final Map<OpenAiChannel, OpenAiGroupService> openAiGroup = new HashMap<>();
 
-    public AbstractChatService(ChatGLMService chatGLMService) {
+    public AbstractChatService(ChatGLMService chatGLMService, QwenService qwenService) {
         openAiGroup.put(OpenAiChannel.ChatGLM, chatGLMService);
+        openAiGroup.put(OpenAiChannel.Qwen, qwenService);
     }
 
 //    @Resource

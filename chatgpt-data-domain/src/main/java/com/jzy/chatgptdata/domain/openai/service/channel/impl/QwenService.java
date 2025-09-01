@@ -1,11 +1,10 @@
 package com.jzy.chatgptdata.domain.openai.service.channel.impl;
 
-
+import com.alibaba.fastjson.JSON;
 import com.jzy.chatglmsdk18753goldn.model.ChatCompletionCommonRequest;
 import com.jzy.chatglmsdk18753goldn.model.ChatCompletionResponse;
 import com.jzy.chatglmsdk18753goldn.model.EventType;
 import com.jzy.chatglmsdk18753goldn.session.OpenAiSession;
-import com.alibaba.fastjson.JSON;
 import com.jzy.chatgptdata.domain.openai.model.aggregates.ChatProcessAggregate;
 import com.jzy.chatgptdata.domain.openai.service.channel.OpenAiGroupService;
 import com.jzy.chatgptdata.domain.openai.service.factory.ChatCompletionRequestFactoryMapper;
@@ -31,14 +30,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * @description ChatGLM 服务
+ * @description Qwen 服务
  */
 @Slf4j
 @Service
-public class ChatGLMService implements OpenAiGroupService {
-
+public class QwenService implements OpenAiGroupService {
     @Resource
-    protected OpenAiSession glmOpenAiSession;
+    protected OpenAiSession qwenOpenAiSession;
 
     @Resource
     private MeterRegistry registry;
@@ -74,7 +72,7 @@ public class ChatGLMService implements OpenAiGroupService {
         }
 
         long startTime = System.currentTimeMillis();
-        glmOpenAiSession.completions(request, new EventSourceListener() {
+        qwenOpenAiSession.completions(request, new EventSourceListener() {
             @Override
             public void onEvent(EventSource eventSource, @Nullable String id, @Nullable String type, String data) {
                 ChatCompletionResponse response = JSON.parseObject(data, ChatCompletionResponse.class);

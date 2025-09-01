@@ -5,6 +5,7 @@ import com.jzy.chatgptdata.domain.openai.model.entity.RuleLogicEntity;
 import com.jzy.chatgptdata.domain.openai.model.entity.UserAccountQuotaEntity;
 import com.jzy.chatgptdata.domain.openai.model.valobj.LogicCheckTypeVO;
 import com.jzy.chatgptdata.domain.openai.service.channel.impl.ChatGLMService;
+import com.jzy.chatgptdata.domain.openai.service.channel.impl.QwenService;
 import com.jzy.chatgptdata.domain.openai.service.rule.ILogicFilter;
 import com.jzy.chatgptdata.domain.openai.service.rule.factory.DefaultLogicFactory;
 import org.springframework.stereotype.Service;
@@ -21,8 +22,8 @@ public class ChatService extends AbstractChatService {
     @Resource
     private DefaultLogicFactory logicFactory;
 
-    public ChatService(ChatGLMService chatGLMService) {
-        super(chatGLMService);
+    public ChatService(ChatGLMService chatGLMService, QwenService qwenService) {
+        super(chatGLMService, qwenService);
     }
 
     @Override

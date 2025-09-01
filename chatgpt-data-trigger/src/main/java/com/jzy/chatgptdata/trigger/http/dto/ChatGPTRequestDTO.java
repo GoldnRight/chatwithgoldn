@@ -1,6 +1,6 @@
 package com.jzy.chatgptdata.trigger.http.dto;
 
-import com.jzy.chatgptdata.types.enums.ChatGLMModel;
+import com.jzy.chatgptdata.types.enums.ChatModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,8 +18,7 @@ import java.util.List;
 public class ChatGPTRequestDTO {
 
     /** 默认模型 */
-    private String model = ChatGLMModel.CHATGLM_STD.getCode();
-
+    private String model = ChatModel.GLM_45_FLASH.getCode();
     /** 问题描述 */
     private List<MessageEntity> messages;
 

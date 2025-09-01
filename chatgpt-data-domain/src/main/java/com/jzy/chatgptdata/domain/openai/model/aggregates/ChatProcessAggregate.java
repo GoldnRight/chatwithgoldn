@@ -1,6 +1,6 @@
 package com.jzy.chatgptdata.domain.openai.model.aggregates;
 
-import com.jzy.chatgptdata.types.enums.ChatGLMModel;
+import com.jzy.chatgptdata.types.enums.ChatModel;
 import com.jzy.chatgptdata.domain.openai.model.entity.MessageEntity;
 import com.jzy.chatgptdata.types.common.Constants;
 import com.jzy.chatgptdata.types.enums.OpenAiChannel;
@@ -23,7 +23,7 @@ public class ChatProcessAggregate {
     /** 用户ID */
     private String openid;
     /** 默认模型 */
-    private String model = ChatGLMModel.CHATGLM_6B_SSE.getCode();
+    private String model = ChatModel.GLM_45_FLASH.getCode();
     /** 问题描述 */
     private List<MessageEntity> messages;
     /** 会话ID */
