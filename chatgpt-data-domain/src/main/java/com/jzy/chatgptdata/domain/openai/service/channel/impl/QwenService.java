@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.jzy.chatglmsdk18753goldn.model.ChatCompletionCommonRequest;
 import com.jzy.chatglmsdk18753goldn.model.ChatCompletionResponse;
 import com.jzy.chatglmsdk18753goldn.model.EventType;
+import com.jzy.chatglmsdk18753goldn.model.Qwen.QwenChatCompletionRequest;
 import com.jzy.chatglmsdk18753goldn.session.OpenAiSession;
 import com.jzy.chatgptdata.domain.openai.model.aggregates.ChatProcessAggregate;
 import com.jzy.chatgptdata.domain.openai.service.channel.OpenAiGroupService;
@@ -41,8 +42,9 @@ public class QwenService implements OpenAiGroupService {
     @Resource
     private MeterRegistry registry;
 
-    @Resource
-    private ChatCompletionRequestFactoryMapper chatCompletionRequestFactoryMapper;
+//    @Resource
+//    private ChatCompletionRequestFactoryMapper chatCompletionRequestFactoryMapper;
+
     @Resource
     private ThreadPoolExecutor prometheusCollectionThreadPoolExecutor;
 
@@ -61,11 +63,12 @@ public class QwenService implements OpenAiGroupService {
                 .collect(Collectors.toList());
 
         // 2. 封装参数
-        ChatCompletionCommonRequest request = null;
+        QwenChatCompletionRequest request = null;
         try {
-            request = chatCompletionRequestFactoryMapper.getFactory(chatProcess.getModel()).createRequest();
+            request = new QwenChatCompletionRequest();
             request.setModel(com.jzy.chatglmsdk18753goldn.model.Model.valueOf(ChatModel.get(chatProcess.getModel()).name())); // chatGLM_6b_SSE、chatglm_lite、chatglm_lite_32k、chatglm_std、chatglm_pro
             request.setMessages(prompts);
+            request.setEnableThinking(false);
         } catch (IllegalArgumentException e) {
             log.error("模型参数异常", e);
             throw new RuntimeException(e);

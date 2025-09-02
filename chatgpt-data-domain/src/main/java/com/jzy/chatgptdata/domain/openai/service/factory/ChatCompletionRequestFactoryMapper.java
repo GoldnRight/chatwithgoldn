@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class ChatCompletionRequestFactoryMapper {
     @Resource
-    private GLMChatCompletionRequestFactory GLMChatCompletionRequestFactory;
+    private GLMChatCompletionRequestFactory glmChatCompletionRequestFactory;
     @Resource
     private QwenChatCompletionRequestFactory qwenChatCompletionRequestFactory;
 
@@ -21,10 +21,10 @@ public class ChatCompletionRequestFactoryMapper {
     @PostConstruct
     public void init() {
         // 注册模型和策略映射关系
-        registerMapping(ChatModel.COGVIEW_3.getCode(), GLMChatCompletionRequestFactory);
-        registerMapping(ChatModel.GLM_45_FLASH.getCode(), GLMChatCompletionRequestFactory);
-        registerMapping(ChatModel.GLM_Z1_AIR.getCode(), GLMChatCompletionRequestFactory);
-        registerMapping(ChatModel.GLM_Z1_FLASH.getCode(), GLMChatCompletionRequestFactory);
+        registerMapping(ChatModel.COGVIEW_3.getCode(), glmChatCompletionRequestFactory);
+        registerMapping(ChatModel.GLM_45_FLASH.getCode(), glmChatCompletionRequestFactory);
+        registerMapping(ChatModel.GLM_Z1_AIR.getCode(), glmChatCompletionRequestFactory);
+        registerMapping(ChatModel.GLM_Z1_FLASH.getCode(), glmChatCompletionRequestFactory);
 //        registerMapping(ChatModel.DeepSeek_V3.getCode(), qwenChatCompletionRequestFactory);
         registerMapping(ChatModel.Qwen3_Coder_Plus.getCode(), qwenChatCompletionRequestFactory);
     }

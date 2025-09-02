@@ -36,7 +36,7 @@ public enum ChatModel {
         switch (code) {
             case "cogview-3":
                 return ChatModel.COGVIEW_3;
-            case "chatglm_45_flash":
+            case "chatglm-4.5-flash":
                 return ChatModel.GLM_45_FLASH;
             case "chatglm-z1-air":
                 return ChatModel.GLM_Z1_AIR;
