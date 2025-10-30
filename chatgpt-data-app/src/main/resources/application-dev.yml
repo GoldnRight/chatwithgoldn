@@ -1,0 +1,184 @@
+server:
+  port: 8091
+
+# 应用配置
+app:
+  config:
+    # 版本，方便通过接口版本升级
+    api-version: v1
+    # 跨域，开发阶段可以设置为 * 不限制
+    cross-origin: '*'
+    # 访问频次限制
+    limit-count: 10
+    # 白名单，不做频次拦截【微信的openai】o24OmvnupICccnkgfdG13pG4xlc4
+    white-list: o24OmvnupICccnkgfdG13pG4xlc4
+
+
+# 支付宝支付 - 沙箱 https://opendocs.alipay.com/common/02kkv7
+# 支付配置；如果你申请了支付渠道，则可以配置 enable = true，否则就配置 false 走流程测试
+wxpay:
+  config:
+    # 状态；true = 开启、false 关闭
+    enabled: false
+    # 申请支付主体的 appid
+    appid:
+    # 商户号
+    mchid:
+    # 回调地址
+    notify-url: http://你的地址.natapp1.cc/api/v1/mall/pay_notify
+    # 商户API私钥路径
+    private-key-path: cert/apiclient_key.pem
+    # 商户证书序列号：openssl x509 -in apiclient_cert.pem -noout -serial
+    merchant-serial-number:
+    # 商户APIV3密钥
+    api-v3-key:
+
+alipay:
+  enabled: true
+  app_id: 9021000150690829
+  merchant_private_key: MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCshZ0AvcJKiPTd8NBJWUe+1+Pq0FCp2zeLjHMsW51jZ/U2IwjjbMV0joDvkmWjR6ERm/5LvSt3AeBJuOYjCXQ/IdmPnxXUIAzYf11y4Mch0N6rJi8qp6GH6WVNkpl09j03PO93fHR66oU1X/t9m/QFgUbovuicA/xkup3m5nkfIRvjSSQWN/T8jjCVS6uTHHY6y/suTXE5LE7SS5YCG2tW7qWQR3CtRxICBmERrYNsvPb6PIbGx0yadHDqKBKRYuEjdaPCx3S99ERD8DcZILn86VtDzBa+Ch7g/HQ8Ez4IUKDXwEgpJhGFKsd5cF+7xqvM2a023kDwMep7KkPl029/AgMBAAECggEBAIkTgLPeEkn2l9jgRh6BeagBEW65Jd5P98pBRiGwiVU6fHMPUzigbCM4Nuojf+5EM44yS9MR8z8Tlon9B54/HMYstxiOZmGtNYevayijwJT1yHZkWIWju4ypvXvtR1DPdcQ1/m8Jy+L+A+ls4f3js/fLx/OV/Gw6HohKXrvf080OyI2b8Vh66vBU1M+jJVBuhNjQKfgzIeOOu3Jh6R8i6W8tzgVa82dHmII0FbX3qhuwZWls7T/eoYy8BKT3cj3dJ0ZIr0v1E8cje69SyIV24BFnxsrJ4mJVCdy9N+omlCu2DBUlBnux5D4mHt419qwsJ7mrh+uCsVFit6AakMYRfkECgYEA8DwHCS647Ih0bVKzvBr2bmCDhBKk4omgC82XQ7qmXiv4fUG6Uiak/SRhjNOoKOuvEZt866lbiMAIh2mADIuNmtoWZzaERRWDOXhzwxLgIPClxmgec9BMk1nhovnZy8ddHOPJxvYnOjtoWWIVD5h5T9xKyhpdjXYTRoqmXa52vmMCgYEAt9gBaYDm90ARZkL8rMmA+bJ00OWiDsBMq3lKvfW/qG7ZYayLqQknufcHT+zvXhsjNR9qWDrmRYIZE3aHQ/ER22jgLDP769UBmx9smpsoxqFTeEq0N+4O0eFzXbW0hMRXpqpzC6NH/tCSWAuIrRCHHbDTySh8T8tbIA03KW2qdzUCgYBNVXWKXjEHa7HXE31qe1+DDqynknzjtBwCUK92DRrLS+pVIBiDo48PMmv4spX6fkxAJcaj8kPWFMNqG+stnqr6A2Sc2y7fMlqo4H6beHMQB4fGA/RxocdU0+VP2pBjCg2OZEGrO8hK9Z7Uzz8qYxICRE8LGkutYyo3ViDSHXx6MwKBgQCDUzLXCbRzRHnpYcqbJyoRtE/L9W1JOkbKas9gWM7644w3QIlXS2nsZrD7gBYRVDNXPES8F/7sAh4lkBLaDreh0w3npY68jSEjjVQIMPP0x8MXd8268jv14yWE+EqmWJcAQFwEITRJqvYPHNYaQmcyZ2EyHdCHM425nJcd6e/OTQKBgQDAzr26fKpSZHW508WEFtJGHjxrzsvXW/r3IHn4MQJUQ1/Sv1oqMnEhm7XguoHQkA5E2c32NiR0bW2rkyGuA7bB4yksim47GMMIhINZEaewDwnpQJocmU6oF4ChY405H0Xb490G10VnPgL5aSQwmMKCBGfaoKkMf3cTIjiG1uHo0Q==
+  alipay_public_key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtp4wqIfnrJo4wPpbW+Pch2PvaQhf4Pngc2eEru1ekKW6YGQZUlDR6TBWtckv3kcxU7Lm3+nR91sK1hHw9Gl0k60kzNqaF43bMe13ZybTuDWazS4v6CLt7OAKfBCFEBOLR/NT9wnhgyVgQ2oZo0Y2whbdS0Iy2wQdgPamj7DtWGtiR20C5S376/KX+JP5NYm3JyOy80i2pZcKr4HsC8xyjIPZJILvWC2/l7ZWO+OjenxhjtIR9bmDz0eYEPd+9/+AtQmpR987kf65+yU3E9ahgzg0IKihjQ4c2OAmDhsMbhK8rmvqRYUkh9oZsr8w9oIlsCQNzAmYbwMLjUa7khjHYQIDAQAB
+  notify_url: http://goldn.tech:8091/api/v1/sale/pay_notify
+  return_url: http://localhost:3002
+  gatewayUrl: https://openapi-sandbox.dl.alipaydev.com/gateway.do
+
+
+# 线程池配置
+thread:
+  pool:
+    executor:
+      config:
+        core-pool-size: 4      # 核心线程数
+        max-pool-size: 8       # 最大线程数
+        keep-alive-time: 3000  # 空闲时间
+        block-queue-size: 100  # 队列大小
+        policy: CallerRunsPolicy
+
+# ChatGLM SDK Config
+chat:
+  sdk:
+      config:
+        # 状态；true = 开启、false 关闭
+        enabled: true
+        # 官网地址
+        api-host-GLM: https://open.bigmodel.cn/
+        # 官网申请 https://open.bigmodel.cn/usercenter/apikeys - 自己可申请
+        api-secret-key-GLM: bb70cc6355ef46cdb890e7b5359cf9c2.qD9j4XV15Dwa1kD8
+        api-host-Qwen: https://dashscope.aliyuncs.com/
+        api-secret-key-Qwen: sk-a53f260c382b48fda4519294cbe91284
+
+# 微信公众号配置信息
+# originalid：原始ID
+# appid：个人AppID
+# token：开通接口服务自定义设置
+wx:
+  enabled: true
+  config:
+    originalId: gh_485263098cc1
+    appid: wx0cca3987b4bc4258
+    token: goldn
+    defaultBase64EncodedSecretKey: B*B^D%fe
+
+## 数据库配置；SpringBoot 默认连接池为 HikariDataSource
+spring:
+  datasource:
+    username: root
+    password: Jzy200305085851
+    url: jdbc:mysql://117.72.79.126:3306/openai?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  hikari:
+    pool-name: Retail_HikariCP
+    minimum-idle: 5          # 最小空闲连接
+    maximum-pool-size: 10    # 最大连接数
+    idle-timeout: 30000      # 空闲超时时间
+    max-lifetime: 600000     # 连接最大生命周期
+    connection-timeout: 10000 # 连接超时时间
+    connection-test-query: SELECT 1
+  type: com.zaxxer.hikari.HikariDataSource
+
+# Redis
+redis:
+  sdk:
+    config:
+      host: 120.26.196.227
+      port: 6379
+      pool-size: 5
+      min-idle-size: 2
+      idle-timeout: 30000
+      connect-timeout: 5000
+      retry-attempts: 3
+      retry-interval: 1000
+      ping-interval: 60000
+      keep-alive: true
+      password: 110100
+      database: 2
+kafka:
+  bootstrap-servers: 120.26.196.227:9094
+  default-topic: opsxlab_test
+  consumer-group-id: chatgpt-data-group
+  listener-concurrency: 1
+  listener-poll-timeout: 1000
+  topics:
+    order-pay-success: order-pay-success-test
+    order-dead-letter: order-dead-letter-test
+  consumer-group:
+    order-service: order-service-group
+  producer:
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    # 可靠性强化配置
+    acks: "all"                     # 关键变更：所有ISR副本确认
+    enable.idempotence: true        # 启用幂等性（防止重复）
+    max.in.flight.requests.per.connection: 1 # 保证消息顺序
+    # 重试策略优化
+    retries: 10                     # 增加重试次数
+    delivery.timeout.ms: 120000     # 总交付超时时间（2分钟）
+    request.timeout.ms: 30000       # 单次请求超时
+    # 其他优化
+    linger-ms: 20                   # 适当增加提高吞吐
+    compression.type: gzip          # 压缩节省带宽
+    batch-size: 32768               # 调大批次（需权衡延迟）
+    # 自定义
+    max-retries: 5
+  consumer:
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    auto-offset-reset: latest
+    enable-auto-commit: false
+    max-poll-records: 10
+    session-timeout-ms: 10000
+
+mybatis:
+  mapper-locations: classpath:/mybatis/mapper/*.xml
+  config-location:  classpath:/mybatis/config/mybatis-config.xml
+
+# 日志
+logging:
+  level:
+    root: info
+  config: classpath:logback-spring.xml
+
+# 监控
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*" # 暴露所有端点，包括自定义端点
+  endpoint:
+    metrics:
+      enabled: true
+    health:
+      show-details: always # 显示详细的健康检查信息
+  metrics:
+    export:
+      prometheus:
+        enabled: true # 启用Prometheus
+  prometheus:
+    enabled: true # 启用Prometheus端点
+  jmx:
+    enabled: true # 启用JMX监控
+  system:
+    cpu:
+      enabled: true # 启用CPU监控
+    memory:
+      enabled: true # 启用内存监控
