@@ -18,14 +18,9 @@ import javax.annotation.Resource;
 @Service
 public class WeiXinBehaviorService implements IWeiXinBehaviorService {
 
-//    @Value("${wx.config.originalid}")
-//    private String originalId;
 
     @Resource
     private WxConfigEntity wxConfig;
-
-//    @Resource
-//    private Cache<String, String> codeCache;
 
     @Resource
     private IWeiXinRepository repository;
@@ -42,24 +37,9 @@ public class WeiXinBehaviorService implements IWeiXinBehaviorService {
         }
 
         // Text 文本类型
-        if (MsgTypeVO.TEXT.getCode().equals(userBehaviorMessageEntity.getMsgType())) {
-
-            // 缓存验证码，检查该openId用户是否短时间内申请过验证码
-//            String isExistCode = codeCache.getIfPresent(userBehaviorMessageEntity.getOpenId());
+        if (MsgTypeVO.TEXT.getCode().equals(userBehaviorMessageEntity.getMsgType()) && "403".equals(userBehaviorMessageEntity.getContent())) {
 
             String code = repository.genCode(userBehaviorMessageEntity.getOpenId());
-
-
-//            // 判断验证码 - 不考虑验证码重复问题
-//            if (StringUtils.isBlank(isExistCode)) {
-//                // 创建验证码
-//                String code = RandomStringUtils.randomNumeric(4);
-//                //
-//                // 双向缓存，根据不同的需求快速查找对应的数据
-//                codeCache.put(code, userBehaviorMessageEntity.getOpenId());
-//                codeCache.put(userBehaviorMessageEntity.getOpenId(), code);
-//                isExistCode = code;
-//            }
 
             // 反馈信息[文本]
             MessageTextEntity res = new MessageTextEntity();
@@ -68,6 +48,18 @@ public class WeiXinBehaviorService implements IWeiXinBehaviorService {
             res.setCreateTime(String.valueOf(System.currentTimeMillis() / 1000L));
             res.setMsgType("text");
             res.setContent(String.format("您的验证码为：%s 有效期%d分钟！", code, 3));
+            return XmlUtil.beanToXml(res);
+        }
+
+        if (MsgTypeVO.TEXT.getCode().equals(userBehaviorMessageEntity.getMsgType())) {
+
+            // 反馈信息[文本]
+            MessageTextEntity res = new MessageTextEntity();
+            res.setToUserName(userBehaviorMessageEntity.getOpenId());
+            res.setFromUserName(wxConfig.getOriginalId());
+            res.setCreateTime(String.valueOf(System.currentTimeMillis() / 1000L));
+            res.setMsgType("text");
+            res.setContent(String.format("请输入【403】获取登录验证码"));
             return XmlUtil.beanToXml(res);
         }
 
