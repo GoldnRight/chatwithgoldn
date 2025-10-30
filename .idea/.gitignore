@@ -6,3 +6,7 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+
+# 忽略所有 yaml 和 yml 文件
+*.yaml
+*.yml
